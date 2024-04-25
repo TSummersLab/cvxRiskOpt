@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="cvxRiskOpt",
-    version="0.1.1",
+    version="0.1.2",
     description="Risk-Based Optimization tool using CVXPY and CVXPYgen",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
