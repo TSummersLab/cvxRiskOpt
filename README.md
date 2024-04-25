@@ -28,16 +28,11 @@ pip install Sphinx==7.2.6
 python3 -m pip install -e .
 ```
 
-
-
 ## Tests
-To run tests, 
-1. install `pytest`:
-```commandline
-conda install pytest
+To run tests,
 ```
-2. Run:
-```commandline
-cd tests
 pytest
 ```
+
+## Examples
+There are several examples in `examples` demonstrating the usage of the package's functionality.
