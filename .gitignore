@@ -3,8 +3,8 @@
 .idea/*
 *.pyc
 *.egg*
-dist/*
-build/*
+dist
+build
 *.csv
 venv
 
