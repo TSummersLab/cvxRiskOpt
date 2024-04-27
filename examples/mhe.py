@@ -8,9 +8,15 @@ from cvxRiskOpt.cclp_risk_opt import cclp_gauss, cclp_dro_mean_cov
 from cvxpygen import cpg
 
 
-def simple_1d_mhe(horizon=10, sim_steps=200, plot_res=False,
+def simple_1d_mhe(horizon=10, sim_steps=200, constraint_type=None, plot_res=False,
                   use_cpg=False, gen_cpg=False,
                   keep_init_run=False, solver=cp.CLARABEL, seed=None):
+    if constraint_type not in ["gauss", "moment", "sym_moment"]:
+        if constraint_type in ["None", "none"]:
+            constraint_type = None
+        if constraint_type is not None:
+            print("Constraint {} type not supported. Replacing with None".format(constraint_type))
+
     if seed is not None:
         np.random.seed(seed)
 
@@ -37,30 +43,27 @@ def simple_1d_mhe(horizon=10, sim_steps=200, plot_res=False,
         mhe_obj += cp.square(y_mhe[t] - meas(x_mhe[t], v_mean))
     for t in range(N_mhe):
         mhe_obj += 100 * cp.square(x_mhe[t + 1] - dyn(x_mhe[t], u_mhe[t], w_mean))
-        # constr += [cclp_gauss(eps=0.05,
-        #                       a=-1,
-        #                       b=x_min,
-        #                       xi1_hat=dyn(x_mhe[t], u_mhe[t], w_mean),
-        #                       gam11=w_var
-        #                       )]
-        # constr += [cclp_gauss(eps=0.05,
-        #                       a=1,
-        #                       b=-x_max,
-        #                       xi1_hat=dyn(x_mhe[t], u_mhe[t], w_mean),
-        #                       gam11=w_var
-        #                       )]
-        constr += [cclp_dro_mean_cov(eps=0.05,
-                                     a=-1,
-                                     b=x_min,
-                                     xi1_hat=dyn(x_mhe[t], u_mhe[t], w_mean),
-                                     gam11=w_var
-                                     )]
-        constr += [cclp_dro_mean_cov(eps=0.05,
-                                     a=1,
-                                     b=-x_max,
-                                     xi1_hat=dyn(x_mhe[t], u_mhe[t], w_mean),
-                                     gam11=w_var
-                                     )]
+        if constraint_type == "gauss":
+            constr += [cclp_gauss(eps=0.05, a=-1, b=x_min,
+                                  xi1_hat=dyn(x_mhe[t], u_mhe[t], w_mean),
+                                  gam11=w_var)]
+            constr += [cclp_gauss(eps=0.05, a=1, b=-x_max,
+                                  xi1_hat=dyn(x_mhe[t], u_mhe[t], w_mean),
+                                  gam11=w_var)]
+        elif constraint_type == "moment":
+            constr += [cclp_dro_mean_cov(eps=0.05, a=-1, b=x_min,
+                                         xi1_hat=dyn(x_mhe[t], u_mhe[t], w_mean),
+                                         gam11=w_var)]
+            constr += [cclp_dro_mean_cov(eps=0.05, a=1, b=-x_max,
+                                         xi1_hat=dyn(x_mhe[t], u_mhe[t], w_mean),
+                                         gam11=w_var)]
+        elif constraint_type == "sym_moment":
+            constr += [cclp_dro_mean_cov(eps=0.05, a=-1, b=x_min,
+                                         xi1_hat=dyn(x_mhe[t], u_mhe[t], w_mean),
+                                         gam11=w_var, centrally_symmetric=True)]
+            constr += [cclp_dro_mean_cov(eps=0.05, a=1, b=-x_max,
+                                         xi1_hat=dyn(x_mhe[t], u_mhe[t], w_mean),
+                                         gam11=w_var, centrally_symmetric=True)]
 
     mhe_prob = cp.Problem(cp.Minimize(mhe_obj), constraints=constr)
 
@@ -146,11 +149,11 @@ def simple_1d_mhe(horizon=10, sim_steps=200, plot_res=False,
 if __name__ == "__main__":
     # TODO: Clarabel output using compiled code is wrong
     solver = cp.OSQP
-    t_hist = simple_1d_mhe(horizon=10, sim_steps=200, plot_res=False,
+    t_hist = simple_1d_mhe(horizon=10, sim_steps=200, constraint_type="gauss", plot_res=False,
                            use_cpg=False, gen_cpg=False,
                            keep_init_run=False, solver=solver, seed=2)
 
-    t_hist_gen = simple_1d_mhe(horizon=10, sim_steps=200, plot_res=True,
+    t_hist_gen = simple_1d_mhe(horizon=10, sim_steps=200, constraint_type="gauss", plot_res=True,
                                use_cpg=True, gen_cpg=True,
                                keep_init_run=False, solver=solver, seed=2)
 

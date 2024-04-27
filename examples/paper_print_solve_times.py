@@ -113,4 +113,20 @@ if __name__ == "__main__":
     filename = "paper_temp_reg_mpc_N_80_solver_OSQP.csv"
     compute_averages(filename)
 
+    # ######################### #
+    print("With Gauss constraints")
+    filename = "paper_mhe_cstr_guass_N_40_solver_ECOS.csv"
+    compute_averages(filename)
+    filename = "paper_mhe_cstr_guass_N_40_solver_OSQP.csv"
+    compute_averages(filename)
+    filename = "paper_mhe_cstr_guass_N_40_solver_SCS.csv"
+    compute_averages(filename)
+
+    print("With Moment-Based constraints")
+    filename = "paper_mhe_cstr_moment_N_40_solver_ECOS.csv"
+    compute_averages(filename)
+    filename = "paper_mhe_cstr_moment_N_40_solver_OSQP.csv"
+    compute_averages(filename)
+    filename = "paper_mhe_cstr_moment_N_40_solver_SCS.csv"
+    compute_averages(filename)
 
