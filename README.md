@@ -4,35 +4,34 @@ A package for risk-based optimization using CVXPY and CVXPYgen.
 
 ## Installation
 
-- create and activate conda env 
+### Installing from PyPI
+The package can be installed using pip:
+```
+pip install cvxRiskOpt
+```
+Notes:
+- The installation will also include cvxpy and cvxpygen.
+- Please refer to cvxpy's documentation for [installing additional solvers](https://www.cvxpy.org/install/).
+- Compiling code with Clarabel requires `Rust`, `Eigen`, and `cbindgen`. (e.g. These can be installed with `homebrew` on MacOS) 
+
+### Installing from source
+- Clone/Download the package
+- Create and activate conda env 
 ```
 conda create --name cvxRiskOpt python=3.10 pip -y
 conda activate cvxRiskOpt
 ```
-- install dependencies
-```
-pip install cvxpy>=1.4.1
-pip install cvxpygen>=0.3.4
-pip install scipy>=1.11.4
-pip install numpy>=1.26.2
-pip install matplotlib>=3.8.0
-```
-For development, also install:
-```
-pip install pytest==7.4.0
-pip install polytope==0.2.5
-pip install Sphinx==7.2.6
-```
-- install the package
+- Install dependencies (see `setup.py`)
+- Install the package
 ```
 python3 -m pip install -e .
 ```
 
 ## Tests
-To run tests,
+To run tests, execute the following from the root of the package.
 ```
 pytest
 ```
 
 ## Examples
-There are several examples in `examples` demonstrating the usage of the package's functionality.
+There are several examples in `examples` demonstrating the usage of the package.
