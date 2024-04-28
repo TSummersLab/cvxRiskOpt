@@ -1,3 +1,4 @@
+""""""
 """
 cvxRiskOpt: Risk-Based Optimization tool using CVXPY and CVXPYgen
 Copyright (C) 2024  Sleiman Safaoui
@@ -20,8 +21,9 @@ GitHub:
 Email:
 snsafaoui@gmail.com
 sleiman.safaoui@utdallas.edu
-"""
-"""
+
+
+
 CVXPY-based data-driven optimization problems that compute risk metrics.
 
 We implement some results from:
@@ -305,6 +307,7 @@ class WassDRExpectation(WassWCEMaxAffine):
 class WassDRCVaR(WassWCEMaxAffine):
     """
     Provides a high-level implementation of the DR-CVaR function.
+
     sup_{P in \mathcal{P}} CVaR^P[a * xi + b]
     where a, b may contain decision variables
     """

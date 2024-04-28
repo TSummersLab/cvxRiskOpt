@@ -1,3 +1,4 @@
+""""""
 """
 cvxRiskOpt: Risk-Based Optimization tool using CVXPY and CVXPYgen
 Copyright (C) 2024  Sleiman Safaoui
@@ -20,8 +21,9 @@ GitHub:
 Email:
 snsafaoui@gmail.com
 sleiman.safaoui@utdallas.edu
-"""
-"""
+
+
+
 CVXPY-based Chance Constraints Linear Programs
 
 We implement some results from:
@@ -232,8 +234,28 @@ def _format_inputs(eps: int | float,
                    xi1_hat: int | float | list | np.ndarray | cp.Variable | cp.Expression = None,
                    xi2_hat: int | float = None,
                    gam11: int | float | list | np.ndarray = None,
-                   gam12=None,
+                   gam12: int | float | list | np.ndarray = None,
                    gam22: int | float = None):
+    """
+    Format the inputs to make them compatible with the CCLP functions
+
+    :param eps: The epsilon value in the chance constraint.
+    :type eps: float
+    :param a: The "a" term in the chance constraint.
+    :type a: int | float | list | np.ndarray | cp.Variable | cp.Expression, optional
+    :param b: The "b" term in the chance constraint.
+    :type b: int | float | cp.Variable | cp.Expression, optional
+    :param xi1_hat: The mean of the "xi1" term in the chance constraint.
+    :type xi1_hat: int | float | list | np.ndarray | cp.Variable | cp.Expression, optional
+    :param xi2_hat: The mean of the "xi2" term in the chance constraint.
+    :type xi2_hat: int | float, optional
+    :param gam11: The covariance "gam11" of the "xi1" term in the chance constraint.
+    :type gam11: int | float | list | np.ndarray, optional
+    :param gam12: The cross-covariance "gam12" between the xi1 and xi2 terms in the chance constraint.
+    :type gam12: int | float | list | np.ndarray, optional
+    :param gam22: The variance "gam22" of the "xi2" term in the chance constraint.
+    :type gam22: int | float, optional
+    """
     # check eps
     if not isinstance(eps, (int, float)) or eps <= 0 or eps > 0.5:
         raise ValueError("eps must be a number in (0, 0.5].")
@@ -272,18 +294,31 @@ def _det_cclp(kappa_e: int | float,
     Form: kappa_e * sigma_x + psi_hat <= 0
 
     :param kappa_e: tightening term based on special cases
+    :type kappa_e: int | float
     :param a: a term
+    :type a: np.ndarray | cp.Variable | cp.Expression
     :param b: b term
+    :type b: int | float | cp.Variable | cp.Expression
     :param xi1_hat: xi1 term mean
+    :type xi1_hat: np.ndarray | cp.Variable | cp.Expression
     :param xi2_hat: xi2 term mean
+    :type xi2_hat: int | float
     :param gam11: xi1 term covar
+    :type gam11: np.ndarray
     :param gam12: xi2 term var
+    :type gam12: np.ndarray
     :param gam22: xi1 and xi2 cross covar
+    :type gam22: np.ndarray
     :param a_xi1_present: indicates a and xi1 present
+    :type a_xi1_present: bool
     :param xi2_present: indicates xi2 present
+    :type xi2_present: bool
     :param b_present: indicates b present
+    :type b_present: bool
     :param assume_sym: assume covar symmetric (else check)
+    :type assume_sym: bool, optional
     :param assume_psd: assume covar PSD (else check)
+    :type assume_psd: bool, optional
     :return:
     """
 
@@ -333,10 +368,13 @@ def cclp_gauss(eps, a=None, b=None,
     Reformulates a CC of the type Prob(a^T xi1 + b + xi2 <= 0) >= 1-eps.
 
     This function reformulates a chance constraint (CC) where the distribution is known to be a Gaussian distribution with:
-    xi = [xi1^T xi2]^T
-    Expect(xi) = [xi1_hat^T xi2_hat]^T
-    Cov(xi) = [gam11       gam12
-               gam12^T    gam22]
+
+    .. math::
+        \\begin{align*}
+        \\xi &= [\\xi1^T \\xi2]^T \\\\
+        \\text{Expect}(\\xi) &= [\\hat{\\xi1}^T \\hat{\\xi2}]^T \\\\
+        \\text{Cov}(\\xi) &= \\begin{bmatrix} \\text{gam11} & \\text{gam12} \\\\ \\text{gam12}^T & \\text{gam22} \\end{bmatrix}
+        \\end{align*}
 
     :param eps: The epsilon value in the chance constraint.
     :type eps: float
@@ -381,11 +419,15 @@ def cclp_dro_mean_cov(eps, a=None, b=None,
     """
     Reformulates a DRO CC of the type inf_{moment based set} Prob(a^T exp + b <= 0) >= bound.
 
-    This function reformulates a distributionally robust optimization (DRO) chance constraint (CC) where the distribution is unknown but belongs to a moment based ambiguity set with known mean and covariance:
-    d = [a^T b]^T
-    Expect(d) = [a_hat^T b_hat]^T
-    Cov(d) = [a_cov             ab_cross_cov
-              ab_cross_cov^T    b_cross     ]
+    This function reformulates a distributionally robust optimization (DRO) chance constraint (CC) where the distribution
+    is unknown but belongs to a moment based ambiguity set with known mean and covariance:
+
+    .. math::
+        \\begin{align*}
+        d &= [a^T b]^T \\\\
+        \\text{Expect}(d) &= [\\hat{a}^T \\hat{b}]^T \\\\
+        \\text{Cov}(d) &= \\begin{bmatrix} a_{\\text{cov}} & ab_{\\text{cross cov}} \\\\ ab_{\\text{cross cov}}^T & b_{\\text{var}} \\end{bmatrix}
+        \\end{align*}
 
     :param eps: The epsilon value in the chance constraint.
     :type eps: float

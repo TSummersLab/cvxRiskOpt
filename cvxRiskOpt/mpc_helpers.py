@@ -1,3 +1,4 @@
+""""""
 """
 cvxRiskOpt: Risk-Based Optimization tool using CVXPY and CVXPYgen
 Copyright (C) 2024  Sleiman Safaoui
@@ -20,8 +21,9 @@ GitHub:
 Email:
 snsafaoui@gmail.com
 sleiman.safaoui@utdallas.edu
-"""
-"""
+
+
+
 Some helper functions for designing and solving MPC problems
 """
 import numpy as np
@@ -30,13 +32,17 @@ import cvxpy as cp
 
 def cp_var_mat_to_list(mat: cp.Variable | cp.Parameter, horizon: int):
     """
-    Converts a 1D or 2D cp.Variable matrix to a list of cp.Variable vectors.
+    Converts a 1D or 2D cp.Variable/Parameter matrix to a list of cp.Variable/Parameter vectors.
+
     E.g.
     (3, 4) matrix where horizon is 4 turns into [(3,), (3,), (3,), (3,)].
     (3,) of horizon 1 turns into [(3,)]
     (4,) where 4 is horizon turns into [(), (), (), ()]
+
     :param mat: (m, horizon), (horizon, m), (m,), or (horizon,) cp.Variable
+    :type mat: cp.Variable | cp.Parameter
     :param horizon: horizon (e.g. MPC horizon).
+    :type horizon: int
     :return:
     """
     # Get the shape of u
@@ -160,12 +166,15 @@ def lin_mpc_expect_xQx(t: int, horizon: int,
                        w_mean: list | np.ndarray = None,
                        w_cov: list | np.ndarray = None):
     """
-    Finds the E(x_t^T Q x_t) term
+    Finds the E(x_t^T Q x_t) term.
+
+    Finds the E(x_t^T Q x_t)
     where
     x_t is a random variable at timestep t in the MPC horizon
     and
     the dynamics are:
     x_{t+1} = Ax_t + Bu_t + w_t.
+
     :param t: current control time step (starting from 0)
     :param horizon: MPC horizon length
     :param A: dynamics matrix

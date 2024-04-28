@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>cvxRiskOpt &#8212; cvxRiskOpt 0.1.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <script src="_static/documentation_options.js?v=92734c54"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="cvxRiskOpt package" href="cvxRiskOpt.html" />
+    <link rel="prev" title="Welcome to cvxRiskOpt’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="cvxriskopt">
+<h1>cvxRiskOpt<a class="headerlink" href="#cvxriskopt" title="Link to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cvxRiskOpt.html">cvxRiskOpt package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cvxRiskOpt.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cvxRiskOpt.html#module-cvxRiskOpt.cclp_risk_opt">cvxRiskOpt.cclp_risk_opt module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cvxRiskOpt.html#cvxRiskOpt.cclp_risk_opt.cclp_dro_mean_cov"><code class="docutils literal notranslate"><span class="pre">cclp_dro_mean_cov()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cvxRiskOpt.html#cvxRiskOpt.cclp_risk_opt.cclp_gauss"><code class="docutils literal notranslate"><span class="pre">cclp_gauss()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cvxRiskOpt.html#module-cvxRiskOpt.mpc_helpers">cvxRiskOpt.mpc_helpers module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cvxRiskOpt.html#cvxRiskOpt.mpc_helpers.cp_var_mat_to_list"><code class="docutils literal notranslate"><span class="pre">cp_var_mat_to_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cvxRiskOpt.html#cvxRiskOpt.mpc_helpers.expect_cov_x_t"><code class="docutils literal notranslate"><span class="pre">expect_cov_x_t()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cvxRiskOpt.html#cvxRiskOpt.mpc_helpers.lin_mpc_expect_xQx"><code class="docutils literal notranslate"><span class="pre">lin_mpc_expect_xQx()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cvxRiskOpt.html#module-cvxRiskOpt.wass_risk_opt_pb">cvxRiskOpt.wass_risk_opt_pb module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cvxRiskOpt.html#cvxRiskOpt.wass_risk_opt_pb.WassDRCVaR"><code class="docutils literal notranslate"><span class="pre">WassDRCVaR</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cvxRiskOpt.html#cvxRiskOpt.wass_risk_opt_pb.WassDRCVaR.instance_counter"><code class="docutils literal notranslate"><span class="pre">WassDRCVaR.instance_counter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cvxRiskOpt.html#cvxRiskOpt.wass_risk_opt_pb.WassDRExpectation"><code class="docutils literal notranslate"><span class="pre">WassDRExpectation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cvxRiskOpt.html#cvxRiskOpt.wass_risk_opt_pb.WassDRExpectation.instance_counter"><code class="docutils literal notranslate"><span class="pre">WassDRExpectation.instance_counter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cvxRiskOpt.html#cvxRiskOpt.wass_risk_opt_pb.WassWCEMaxAffine"><code class="docutils literal notranslate"><span class="pre">WassWCEMaxAffine</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cvxRiskOpt.html#cvxRiskOpt.wass_risk_opt_pb.WassWCEMaxAffine.instance_counter"><code class="docutils literal notranslate"><span class="pre">WassWCEMaxAffine.instance_counter</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cvxRiskOpt.html#module-cvxRiskOpt">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">cvxRiskOpt</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">cvxRiskOpt</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cvxRiskOpt.html">cvxRiskOpt package</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to cvxRiskOpt’s documentation!</a></li>
+      <li>Next: <a href="cvxRiskOpt.html" title="next chapter">cvxRiskOpt package</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Sleiman Safaoui, Tyler Summers.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/modules.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
