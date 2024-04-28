@@ -365,14 +365,16 @@ def cclp_gauss(eps, a=None, b=None,
                gam11=None, gam12=None, gam22=None,
                assume_sym=False, assume_psd=False):
     """
-    Reformulates a CC of the type Prob(a^T xi1 + b + xi2 <= 0) >= 1-eps.
+    Reformulates a CC of the type
+    :math:`\\mathbb{P}(a^T \\xi_1 + b + \\xi_2 \\leq 0) \\geq 1-\\epsilon`
+    where the distribution is Gaussian.
 
     This function reformulates a chance constraint (CC) where the distribution is known to be a Gaussian distribution with:
 
     .. math::
         \\begin{align*}
-        \\xi &= [\\xi1^T \\xi2]^T \\\\
-        \\text{Expect}(\\xi) &= [\\hat{\\xi1}^T \\hat{\\xi2}]^T \\\\
+        \\xi &= [\\xi_1^T \\xi_2]^T \\\\
+        \\text{Expect}(\\xi) &= [\\hat{\\xi_1}^T \\hat{\\xi_2}]^T \\\\
         \\text{Cov}(\\xi) &= \\begin{bmatrix} \\text{gam11} & \\text{gam12} \\\\ \\text{gam12}^T & \\text{gam22} \\end{bmatrix}
         \\end{align*}
 
@@ -417,16 +419,18 @@ def cclp_dro_mean_cov(eps, a=None, b=None,
                       assume_sym=False, assume_psd=False,
                       centrally_symmetric=False):
     """
-    Reformulates a DRO CC of the type inf_{moment based set} Prob(a^T exp + b <= 0) >= bound.
+    Reformulates a DRO CC of the type
+    :math:`\\inf_{\\mathbb{P} \\in \\mathcal{P}} \\mathbb{P}(a^T \\xi_1 + b + \\xi_2 \\leq 0) \\geq 1-\\epsilon`
+    where :math:`\\mathcal{P}` is a moment-based ambiguity set.
 
     This function reformulates a distributionally robust optimization (DRO) chance constraint (CC) where the distribution
     is unknown but belongs to a moment based ambiguity set with known mean and covariance:
 
     .. math::
         \\begin{align*}
-        d &= [a^T b]^T \\\\
-        \\text{Expect}(d) &= [\\hat{a}^T \\hat{b}]^T \\\\
-        \\text{Cov}(d) &= \\begin{bmatrix} a_{\\text{cov}} & ab_{\\text{cross cov}} \\\\ ab_{\\text{cross cov}}^T & b_{\\text{var}} \\end{bmatrix}
+        \\xi &= [\\xi_1^T \\xi_2]^T \\\\
+        \\text{Expect}(\\xi) &= [\\hat{\\xi_1}^T \\hat{\\xi_2}]^T \\\\
+        \\text{Cov}(\\xi) &= \\begin{bmatrix} \\text{gam11} & \\text{gam12} \\\\ \\text{gam12}^T & \\text{gam22} \\end{bmatrix}
         \\end{align*}
 
     :param eps: The epsilon value in the chance constraint.

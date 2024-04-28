@@ -13,7 +13,7 @@
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="cvxRiskOpt" href="modules.html" />
+    <link rel="next" title="Install" href="install/index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -38,20 +38,39 @@
 To encourage risk-based optimization problems and help speed up the development cycle, we created cvxRiskOpt.</p>
 <p>cvxRiskOpt provides users with tools to automatically generate risk-based optimization problems and risk-based constraints. cvxRiskOpt integrates with CVXPY directly resulting in CVXPY Problems and constraints. These also enables using CVXPYgen directly allowing users to automatically generate C-code which can be used on embedded systems or utilized with the python-wrapper to speed up solving the optimization problems.</p>
 <div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+</div>
+<div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">cvxRiskOpt</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="cvxRiskOpt.html">cvxRiskOpt package</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="cvxRiskOpt.html#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cvxRiskOpt.html#module-cvxRiskOpt.cclp_risk_opt">cvxRiskOpt.cclp_risk_opt module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cvxRiskOpt.html#module-cvxRiskOpt.mpc_helpers">cvxRiskOpt.mpc_helpers module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cvxRiskOpt.html#module-cvxRiskOpt.wass_risk_opt_pb">cvxRiskOpt.wass_risk_opt_pb module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cvxRiskOpt.html#module-cvxRiskOpt.cclp_risk_opt">cvxRiskOpt.cclp_risk_opt module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cvxRiskOpt.html#cvxRiskOpt.cclp_risk_opt.cclp_dro_mean_cov"><code class="docutils literal notranslate"><span class="pre">cclp_dro_mean_cov()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cvxRiskOpt.html#cvxRiskOpt.cclp_risk_opt.cclp_gauss"><code class="docutils literal notranslate"><span class="pre">cclp_gauss()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cvxRiskOpt.html#module-cvxRiskOpt.mpc_helpers">cvxRiskOpt.mpc_helpers module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cvxRiskOpt.html#cvxRiskOpt.mpc_helpers.cp_var_mat_to_list"><code class="docutils literal notranslate"><span class="pre">cp_var_mat_to_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cvxRiskOpt.html#cvxRiskOpt.mpc_helpers.expect_cov_x_t"><code class="docutils literal notranslate"><span class="pre">expect_cov_x_t()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cvxRiskOpt.html#cvxRiskOpt.mpc_helpers.lin_mpc_expect_xQx"><code class="docutils literal notranslate"><span class="pre">lin_mpc_expect_xQx()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cvxRiskOpt.html#module-cvxRiskOpt.wass_risk_opt_pb">cvxRiskOpt.wass_risk_opt_pb module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cvxRiskOpt.html#cvxRiskOpt.wass_risk_opt_pb.WassDRCVaR"><code class="docutils literal notranslate"><span class="pre">WassDRCVaR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cvxRiskOpt.html#cvxRiskOpt.wass_risk_opt_pb.WassDRExpectation"><code class="docutils literal notranslate"><span class="pre">WassDRExpectation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cvxRiskOpt.html#cvxRiskOpt.wass_risk_opt_pb.WassWCEMaxAffine"><code class="docutils literal notranslate"><span class="pre">WassWCEMaxAffine</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="cvxRiskOpt.html#module-cvxRiskOpt">Module contents</a></li>
 </ul>
 </li>
 </ul>
 </li>
 </ul>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
 </div>
 </section>
 <section id="indices-and-tables">
@@ -80,19 +99,20 @@ To encourage risk-based optimization problems and help speed up the development 
 
 
 <h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install/index.html">Install</a></li>
+</ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">cvxRiskOpt</a></li>
 </ul>
-
-<div class="relations">
-<h3>Related Topics</h3>
 <ul>
-  <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="modules.html" title="next chapter">cvxRiskOpt</a></li>
-  </ul></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/index.html">User Guide</a></li>
 </ul>
-</div>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
+</ul>
+
+
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
@@ -103,14 +123,6 @@ To encourage risk-based optimization problems and help speed up the development 
     </div>
 </div>
 <script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
-
-
         </div>
       </div>
       <div class="clearer"></div>

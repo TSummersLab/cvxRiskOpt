@@ -1,6 +1,3 @@
-import sys, os
-sys.path.append(os.path.abspath('..'))
-
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -8,6 +5,10 @@ sys.path.append(os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+
+import sys
+import os
+sys.path.append(os.path.abspath('..'))
 
 project = 'cvxRiskOpt'
 copyright = '2024, Sleiman Safaoui, Tyler Summers'
@@ -17,7 +18,13 @@ release = '0.1.2'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.autodoc']
+extensions = ['sphinx.ext.autodoc',
+              'sphinx.ext.doctest',
+              'sphinx.ext.todo',
+              'sphinx.ext.coverage',
+              'sphinx.ext.mathjax',
+              'sphinx.ext.viewcode',
+              ]
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
@@ -29,3 +36,10 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 html_theme = 'alabaster'
 html_static_path = ['_static']
+
+html_sidebars = {
+   '**': [
+       'about.html', 'navigation.html', 'searchbox.html',
+   ]
+}
+
