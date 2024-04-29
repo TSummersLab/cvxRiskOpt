@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Moving Horizon Estimation &#8212; cvxRiskOpt 0.1.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=12dfc556" />
+    <script src="../../_static/documentation_options.js?v=92734c54"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="moving-horizon-estimation">
+<h1>Moving Horizon Estimation<a class="headerlink" href="#moving-horizon-estimation" title="Link to this heading">¶</a></h1>
+<p>Consider a state estimation problem using a Moving Horizon Estimator (MHE).
+The basic problem consists of finding the state estimate <span class="math notranslate nohighlight">\(x_{mhe}\)</span> over a horizon <span class="math notranslate nohighlight">\(N\)</span> the minimizes the sum of squares between the predicted measurements <span class="math notranslate nohighlight">\((y[t] - Cx_{mhe}[t])\)</span> and the true measurements as well as the the state estimate and the predicted state <span class="math notranslate nohighlight">\((x_{mhe}[t+1] - (Ax_{mhe}[t]) + Bu[t])\)</span> where <span class="math notranslate nohighlight">\(A, B, C\)</span> are the system matrices, <span class="math notranslate nohighlight">\(y\)</span> are the prior measurements (including the current), and <span class="math notranslate nohighlight">\(u\)</span> are the prior controls.
+The basic optimization problem is given by:</p>
+<div class="math notranslate nohighlight">
+\[\min_{x_{mhe}} \quad \sum_{t=0}^{N+1} (y[t] - Cx_{mhe}[t]) + \gamma \sum_{t=0}^{N} (x_{mhe}[t+1] - (Ax_{mhe}[t]) + Bu[t])\]</div>
+<p>where <span class="math notranslate nohighlight">\(\gamma\)</span> is a weighing parameter that balances the relative importance of the prior model predictions.</p>
+<p>The system dynamics, including the noise, are given by:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align*}
+    x[t+1] &amp;= Ax[t] + Bu[t] + \mathbf{w}[t] = f(x[t], u[t], \mathbf{w}[t])\\
+    y[t] &amp;= Cx[t] + \mathbf{v}[t]
+\end{align*}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{w}, \mathbf{v}\)</span> are the process and measurement noise.</p>
+<p>In addition to the basic problem, we may know some information about the state, such as its bounds <span class="math notranslate nohighlight">\(x_{min}, x_{max}\)</span>. Consider the following chance constraints on the state estimate that incorporate these bounds:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align*}
+    &amp; \mathbb{P}(f(x_{mhe}[t], u[t], \mathbf{w}[t]) \geq x_{min}) \geq 1-\epsilon \\
+    \iff &amp; \mathbb{P}(-f(x_{mhe}[t], u[t], \mathbf{w}[t]) + x_{min} \leq 0) \geq 1-\epsilon \\
+    &amp;\mathbb{P}(f(x_{mhe}[t], u[t], \mathbf{w}[t]) \leq x_{max}) \geq 1-\epsilon \\
+    \iff &amp; \mathbb{P}(f(x_{mhe}[t], u[t], \mathbf{w}[t]) - x_{max} \leq 0) \geq 1-\epsilon \\
+\end{align*}\end{split}\]</div>
+<p>Assume that <span class="math notranslate nohighlight">\(\mathbf{w}, \mathbf{v}\)</span> follow Gaussian distributions with means <span class="math notranslate nohighlight">\(\overline{w}, \overline{v}\)</span> and variances <span class="math notranslate nohighlight">\(\sigma_w^2, \sigma_v^2\)</span>: <span class="math notranslate nohighlight">\(\mathbf{w} \sim \mathcal{N}(\overline{w}, \sigma^2_w)\)</span>, <span class="math notranslate nohighlight">\(\mathbf{v} \sim \mathcal{N}(\overline{v}, \sigma^2_v)\)</span>.</p>
+<p>The chance constraint can be reformulated into a deterministic constraint as follows:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align*}
+&amp;\mathbb{P}(-f(x_{mhe}[t], u[t], \mathbf{w}[t]) + x_{min} \leq 0) \geq 1-\epsilon \\
+\iff &amp; -f(x_{mhe}[t], u[t], \overline{w}[t]) + x_{min} + \sigma_w \Phi^{-1}(1-\epsilon) \leq 0 \\
+\iff &amp; f(x_{mhe}[t], u[t], \overline{w}[t]) \geq x_{min} + \sigma_w \Phi^{-1}(1-\epsilon) \\
+&amp;\mathbb{P}(f(x_{mhe}[t], u[t], \mathbf{w}[t]) - x_{max} \leq 0) \geq 1-\epsilon \\
+\iff &amp; f(x_{mhe}[t], u[t], \overline{w}[t]) - x_{max} + \sigma_w \Phi^{-1}(1-\epsilon) \leq 0 \\
+\iff &amp; f(x_{mhe}[t], u[t], \overline{w}[t]) \leq x_{max} - \sigma_w \Phi^{-1}(1-\epsilon)
+\end{align*}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\Phi^{-1}\)</span> is the inverse CDF of the standard normal Gaussian distribution.
+However, using cvxRiskOpt, these deterministic reformulation are not necessary and the chance constraint can be encoded directly into the CVXPY problem.</p>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h2>
+<p>In the following code, we solve the constrained moving horizon estimation problem with CVXPY and cvxRiskOpt.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">cvxpy</span> <span class="k">as</span> <span class="nn">cp</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span>
+<span class="kn">from</span> <span class="nn">cvxRiskOpt.cclp_risk_opt</span> <span class="kn">import</span> <span class="n">cclp_gauss</span>
+
+<span class="k">def</span> <span class="nf">dyn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="n">u</span> <span class="o">+</span> <span class="n">w</span>
+
+<span class="k">def</span> <span class="nf">meas</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="n">v</span>
+
+<span class="n">sim_steps</span> <span class="o">=</span> <span class="mi">200</span>
+<span class="n">N_mhe</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">w_mean</span><span class="p">,</span> <span class="n">v_mean</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+<span class="n">w_var</span><span class="p">,</span> <span class="n">v_var</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mi">10</span>
+<span class="n">u_min</span><span class="p">,</span> <span class="n">u_max</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span>
+<span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">60</span>
+<span class="n">x0</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># initial state</span>
+
+<span class="n">x_mhe</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">N_mhe</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;x_mhe&#39;</span><span class="p">)</span>
+<span class="n">x_mhe0</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;x_mhe0&#39;</span><span class="p">)</span>
+<span class="n">y_mhe</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">N_mhe</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;y_mhe&#39;</span><span class="p">)</span>
+<span class="n">u_mhe</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">N_mhe</span><span class="p">,</span> <span class="s1">&#39;u_mhe&#39;</span><span class="p">)</span>
+<span class="n">mhe_obj</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">constr</span> <span class="o">=</span> <span class="p">[</span><span class="n">x_mhe</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">x_mhe0</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_mhe</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="n">mhe_obj</span> <span class="o">+=</span> <span class="n">cp</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">y_mhe</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">-</span> <span class="n">meas</span><span class="p">(</span><span class="n">x_mhe</span><span class="p">[</span><span class="n">t</span><span class="p">],</span> <span class="n">v_mean</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_mhe</span><span class="p">):</span>
+    <span class="n">mhe_obj</span> <span class="o">+=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">cp</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">x_mhe</span><span class="p">[</span><span class="n">t</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">dyn</span><span class="p">(</span><span class="n">x_mhe</span><span class="p">[</span><span class="n">t</span><span class="p">],</span> <span class="n">u_mhe</span><span class="p">[</span><span class="n">t</span><span class="p">],</span> <span class="n">w_mean</span><span class="p">))</span>
+    <span class="n">constr</span> <span class="o">+=</span> <span class="p">[</span><span class="n">cclp_gauss</span><span class="p">(</span><span class="n">eps</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">a</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">x_min</span><span class="p">,</span>
+                          <span class="n">xi1_hat</span><span class="o">=</span><span class="n">dyn</span><span class="p">(</span><span class="n">x_mhe</span><span class="p">[</span><span class="n">t</span><span class="p">],</span> <span class="n">u_mhe</span><span class="p">[</span><span class="n">t</span><span class="p">],</span> <span class="n">w_mean</span><span class="p">),</span>
+                          <span class="n">gam11</span><span class="o">=</span><span class="n">w_var</span><span class="p">)]</span>
+    <span class="n">constr</span> <span class="o">+=</span> <span class="p">[</span><span class="n">cclp_gauss</span><span class="p">(</span><span class="n">eps</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="o">=-</span><span class="n">x_max</span><span class="p">,</span>
+                          <span class="n">xi1_hat</span><span class="o">=</span><span class="n">dyn</span><span class="p">(</span><span class="n">x_mhe</span><span class="p">[</span><span class="n">t</span><span class="p">],</span> <span class="n">u_mhe</span><span class="p">[</span><span class="n">t</span><span class="p">],</span> <span class="n">w_mean</span><span class="p">),</span>
+                          <span class="n">gam11</span><span class="o">=</span><span class="n">w_var</span><span class="p">)]</span>
+
+<span class="n">mhe_prob</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">Minimize</span><span class="p">(</span><span class="n">mhe_obj</span><span class="p">),</span> <span class="n">constraints</span><span class="o">=</span><span class="n">constr</span><span class="p">)</span>
+
+<span class="c1"># set up the control signal</span>
+<span class="n">u_hist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">sim_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sim_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="n">u_cur</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">sim_steps</span> <span class="o">/</span> <span class="mi">2</span> <span class="k">else</span> <span class="o">-</span><span class="mf">0.5</span>
+    <span class="n">u_cur</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">u_cur</span><span class="p">,</span> <span class="n">u_min</span><span class="p">,</span> <span class="n">u_max</span><span class="p">)</span>
+    <span class="n">u_hist</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">u_cur</span>
+
+<span class="c1"># get all the data</span>
+<span class="n">x_true_hist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">sim_steps</span><span class="p">)</span>
+<span class="n">y_meas_hist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">sim_steps</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sim_steps</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">x_true_hist</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">x0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">w_cur</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">w_mean</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">w_var</span><span class="p">))</span>
+        <span class="n">x_true_hist</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">dyn</span><span class="p">(</span><span class="n">x_true_hist</span><span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">u_hist</span><span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">w_cur</span><span class="p">)</span>
+    <span class="c1"># measure state</span>
+    <span class="n">v_cur</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">v_mean</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">v_var</span><span class="p">))</span>
+    <span class="n">y_meas_hist</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">meas</span><span class="p">(</span><span class="n">x_true_hist</span><span class="p">[</span><span class="n">t</span><span class="p">],</span> <span class="n">v_cur</span><span class="p">)</span>
+
+<span class="n">x_est_hist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">sim_steps</span><span class="p">)</span>
+<span class="n">x_kf_est_hist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">sim_steps</span><span class="p">)</span>
+<span class="n">x_kf_est_hist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_meas_hist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">P</span><span class="p">,</span> <span class="n">K</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">sim_steps</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;=</span> <span class="n">N_mhe</span><span class="p">:</span>
+        <span class="n">y_mhe</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">y_meas_hist</span><span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="n">N_mhe</span><span class="p">:</span><span class="n">t</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">u_mhe</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">u_hist</span><span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="n">N_mhe</span><span class="p">:</span><span class="n">t</span><span class="p">]</span>
+        <span class="n">x_mhe0</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">x_est_hist</span><span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="n">N_mhe</span><span class="p">]</span>
+        <span class="n">mhe_prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">CLARABEL</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">mhe_prob</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
+        <span class="n">x_est_hist</span><span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="n">N_mhe</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span><span class="n">t</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_mhe</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="c1"># # KF gain:</span>
+    <span class="n">P_pred</span> <span class="o">=</span> <span class="n">P</span> <span class="o">+</span> <span class="n">w_var</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="n">P_pred</span> <span class="o">/</span> <span class="p">(</span><span class="n">P_pred</span> <span class="o">+</span> <span class="n">v_var</span><span class="p">)</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">K</span><span class="p">)</span> <span class="o">*</span> <span class="n">P_pred</span>
+    <span class="n">x_kf_est_hist</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">K</span><span class="p">)</span> <span class="o">*</span> <span class="n">dyn</span><span class="p">(</span><span class="n">x_kf_est_hist</span><span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">u_hist</span><span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">w_mean</span><span class="p">)</span> <span class="o">+</span> <span class="n">K</span> <span class="o">*</span> <span class="n">y_meas_hist</span><span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">sim_steps</span><span class="p">),</span> <span class="n">x_true_hist</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">sim_steps</span><span class="p">),</span> <span class="n">y_meas_hist</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;tab:red&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">sim_steps</span><span class="p">),</span> <span class="n">x_est_hist</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;tab:green&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">sim_steps</span><span class="p">),</span> <span class="n">x_kf_est_hist</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;tab:blue&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="s2">&quot;meas&quot;</span><span class="p">,</span> <span class="s2">&quot;est&quot;</span><span class="p">,</span> <span class="s2">&quot;KF&quot;</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">mean_est_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x_true_hist</span> <span class="o">-</span> <span class="n">x_est_hist</span><span class="p">)[</span><span class="mi">1</span><span class="p">:])</span>
+<span class="n">mean_meas_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x_true_hist</span> <span class="o">-</span> <span class="n">y_meas_hist</span><span class="p">)[</span><span class="mi">1</span><span class="p">:])</span>
+<span class="n">mean_kf_est_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x_true_hist</span> <span class="o">-</span> <span class="n">x_kf_est_hist</span><span class="p">)[</span><span class="mi">1</span><span class="p">:])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;MHE diff:&#39;</span><span class="p">,</span> <span class="n">mean_est_diff</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Measurements diff: &#39;</span><span class="p">,</span> <span class="n">mean_meas_diff</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;KF diff: &#39;</span><span class="p">,</span> <span class="n">mean_kf_est_diff</span><span class="p">)</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../../_images/state_estimation.png"><img alt="state estimation results" src="../../_images/state_estimation.png" style="width: 800px;" /></a>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MHE</span> <span class="n">diff</span><span class="p">:</span> <span class="mf">0.5968899812607984</span>
+<span class="n">Measurements</span> <span class="n">diff</span><span class="p">:</span>  <span class="mf">2.2559395317797053</span>
+<span class="n">KF</span> <span class="n">diff</span><span class="p">:</span>  <span class="mf">0.6506733772967995</span>
+</pre></div>
+</div>
+<p>If the Guassian assumption about the noise were to change, updating the chance constraint can easily be done by changing the <cite>cclp_gauss</cite> call to call another <cite>cclp_risk_opt</cite> function.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">cvxRiskOpt</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install/index.html">Install</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">cvxRiskOpt</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/index.html">User Guide</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Examples</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Sleiman Safaoui, Tyler Summers.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../_sources/examples/cclp/mhe.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

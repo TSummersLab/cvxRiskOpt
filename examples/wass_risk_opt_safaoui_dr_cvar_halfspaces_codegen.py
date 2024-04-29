@@ -1,7 +1,7 @@
 import numpy as np
 import cvxpy as cp
 from cvxpygen import cpg
-from cvxRiskOpt.wass_risk_opt_pb import WassWCEMaxAffine
+from cvxRiskOpt.wass_risk_opt_pb import WassWCEMaxAffine, WassDRCVaR
 
 VERBOSE = True
 
@@ -17,7 +17,7 @@ def safaoui_dr_cvar_halfspaces_codegen():
     h = np.array([1., 1])
     h = h / np.linalg.norm(h)
     r = [1]
-    solver = cp.ECOS
+    solver = cp.CLARABEL
 
     num_samples = 30
 
@@ -58,10 +58,23 @@ def safaoui_dr_cvar_halfspaces_codegen():
     test_result_cpg = g.value
     test_obj_cpg = test_prob.value
 
+    # simpler formulation using WassDRCVaR
+    risk_prob = WassDRCVaR(num_samples=num_samples, xi_length=2, a=-h, b=-g+r[0], alpha=alpha, used_norm=2)
+    halfspace_prob = cp.Problem(cp.Minimize(g), [risk_prob.objective.expr <= delta] + risk_prob.constraints)
+    for par in halfspace_prob.param_dict.keys():
+        if 'eps' in par:
+            halfspace_prob.param_dict[par].value = eps
+        if 'samples' in par:
+            halfspace_prob.param_dict[par].value = xi.T
+    halfspace_prob.solve(solver=solver)
+    halfspace_prob_result = g.value
+    halfspace_prob_obj = halfspace_prob.value
+
     close = np.isclose(test_result_cpg, test_result, rtol=1e-5, atol=1e-5)
     all_close = np.all(close)
     print("g: ", test_result)
     print("g with codegen: ", test_result_cpg)
+    print("g with cvxRiskOpt's Dr-CVaR function: ", halfspace_prob_result)
     print("Decision var close: ", all_close)
     close = np.isclose(test_obj_cpg, test_obj, rtol=1e-5, atol=1e-5)
     print("Objective close: ", close)
