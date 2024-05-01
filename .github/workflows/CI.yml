@@ -1,0 +1,69 @@
+# This workflow will build the package and run pytest tests
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+    - name: Checkout repository and submodules
+      uses: actions/checkout@v2
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt install libeigen3-dev
+        python -m pip install --upgrade pip
+        python -m pip install .[dev]
+
+    - name: Install dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install eigen
+        python -m pip install --upgrade pip
+        python3 -m pip install .[dev]
+
+    - name: Install dependencies (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        vcpkg install eigen3:x64-windows
+        python -m pip install --upgrade pip
+        python -m pip install .[dev]
+
+    # TEST THE PACKAGE
+    - name: Test with pytest (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        cd tests
+        pytest
+
+    - name: Test with pytest (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        cd tests
+        pytest
+
+    - name: Test with pytest (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        cd tests
+        pytest
