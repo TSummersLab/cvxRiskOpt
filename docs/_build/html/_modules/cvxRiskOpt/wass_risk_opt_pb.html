@@ -67,50 +67,57 @@
 <span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Number</span>
 <span class="kn">from</span> <span class="nn">cvxpy.problems.problem</span> <span class="kn">import</span> <span class="n">Problem</span> <span class="k">as</span> <span class="n">CVXPYProb</span>
 <span class="kn">from</span> <span class="nn">cvxpy.utilities.deterministic</span> <span class="kn">import</span> <span class="n">unique_list</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 
 
 <div class="viewcode-block" id="WassWCEMaxAffine">
 <a class="viewcode-back" href="../../cvxRiskOpt.html#cvxRiskOpt.wass_risk_opt_pb.WassWCEMaxAffine">[docs]</a>
 <span class="k">class</span> <span class="nc">WassWCEMaxAffine</span><span class="p">(</span><span class="n">CVXPYProb</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Wasserstein Worst Case Expectation with Max of Affine terms.</span>
+<span class="sd">    Wasserstein Worst Case Expectation Problem with Max of Affine Terms.</span>
 
 <span class="sd">    This class implements a generic solution for Cor 5.1 (i), eq (15a) with affine loss functions:</span>
-<span class="sd">    l = max_k {a_k @ xi + b_k}</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \\ell = \\max_k \\{ \\langle a_k,  \\xi \\rangle + b_k \\}</span>
+
 <span class="sd">    where</span>
-<span class="sd">    xi (m x 1): the random variable for which we have samples</span>
-<span class="sd">    a_k (m x 1): a vector that is either a constant vector or a scalar times a decision variable (cvxpy affine expression)</span>
-<span class="sd">    b_k (1 x 1): a scalar or a 1-dimensional cvxpy affine expression</span>
+<span class="sd">        - xi (m x 1): the random variable for which we have samples</span>
+<span class="sd">        - a_k (m x 1): a vector that is either a constant vector or a scalar times a decision variable (cvxpy affine expression)</span>
+<span class="sd">        - b_k (1 x 1): a scalar or a 1-dimensional cvxpy affine expression</span>
+<span class="sd">        - :math:`\\langle \\cdot, \\cdot \\rangle` is the inner product</span>
 
 <span class="sd">    .. note::</span>
 <span class="sd">        Currently, this is only implemented for the 1-, 2-, and inf-norm cases.</span>
 
-<span class="sd">    :param num_samples: The number of samples.</span>
-<span class="sd">    :type num_samples: int</span>
-<span class="sd">    :param a_k_list: A list of vectors that are either constant vectors or scalars times a decision variable.</span>
-<span class="sd">    :type a_k_list: list of array_like or cvxpy.AffineExpression</span>
-<span class="sd">    :param b_k_list: A list of scalars or 1-dimensional cvxpy affine expressions.</span>
-<span class="sd">    :type b_k_list: list of float or cvxpy.AffineExpression, optional</span>
-<span class="sd">    :param support_C: The support matrix C.</span>
-<span class="sd">    :type support_C: array_like, optional</span>
-<span class="sd">    :param support_d: The support vector d.</span>
-<span class="sd">    :type support_d: array_like, optional</span>
-<span class="sd">    :param used_norm: The norm to be used. Default is 2.</span>
-<span class="sd">    :type used_norm: int, optional</span>
-<span class="sd">    :param vp_suffix: The suffix for the variable prefix.</span>
-<span class="sd">    :type vp_suffix: str, optional</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">    ----------</span>
+<span class="sd">        num_samples: int:</span>
+<span class="sd">            The number of samples.</span>
+<span class="sd">        a_k_list: Number | array_like</span>
+<span class="sd">            A list of vectors that are either constant vectors or scalars times a decision variable.</span>
+<span class="sd">        b_k_list: array_like</span>
+<span class="sd">            A list of scalars or 1-dimensional cvxpy affine expressions.</span>
+<span class="sd">        support_C: np.ndarray, optional</span>
+<span class="sd">            The support matrix C. If None passed, the support is considered to be the real space.</span>
+<span class="sd">        support_d: np.ndarray, optional</span>
+<span class="sd">            The support vector d. If None passed, the support is considered to be the real space.</span>
+<span class="sd">        used_norm: int | np.inf, optional</span>
+<span class="sd">            The norm to be used. Either 1, 2, or infinity (np.inf). Default is 2.</span>
+<span class="sd">        vp_suffix: str, optional</span>
+<span class="sd">            The suffix for the variable/parameter names.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">instance_counter</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">,</span>
-                 <span class="n">a_k_list</span><span class="p">,</span> <span class="n">b_k_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">a_k_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">b_k_list</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">support_C</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">support_d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">used_norm</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                 <span class="n">vp_suffix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                 <span class="n">vp_suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># choose the cp variable and parameter suffix</span>
         <span class="n">WassWCEMaxAffine</span><span class="o">.</span><span class="n">instance_counter</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">vp_suffix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">vp_suffix</span> <span class="o">=</span> <span class="s2">&quot;_WWCEMA&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">WassWCEMaxAffine</span><span class="o">.</span><span class="n">instance_counter</span><span class="p">)</span>
+            <span class="n">vp_suffix</span> <span class="o">=</span> <span class="s2">&quot;_wwcema&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">WassWCEMaxAffine</span><span class="o">.</span><span class="n">instance_counter</span><span class="p">)</span>
 
         <span class="c1"># number of samples</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_num_samples</span> <span class="o">=</span> <span class="n">num_samples</span>
@@ -232,20 +239,72 @@
     <span class="c1"># TODO: consider implementing some operators.</span>
 
 
+<div class="viewcode-block" id="update_wass_wce_params">
+<a class="viewcode-back" href="../../cvxRiskOpt.html#cvxRiskOpt.wass_risk_opt_pb.update_wass_wce_params">[docs]</a>
+<span class="k">def</span> <span class="nf">update_wass_wce_params</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">samples</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Update the parameters associated with the WassWCEMaxAffine problem.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">    ----------</span>
+<span class="sd">        prob: WassWCEMaxAffine:</span>
+<span class="sd">            WassWCEMaxAffine problem</span>
+<span class="sd">        eps: int:</span>
+<span class="sd">            Wasserstein ball radius</span>
+<span class="sd">        samples: np.ndarray:</span>
+<span class="sd">            Data samples</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">prob</span><span class="o">.</span><span class="n">param_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="s1">&#39;eps&#39;</span> <span class="ow">in</span> <span class="n">par</span><span class="p">:</span>
+            <span class="n">prob</span><span class="o">.</span><span class="n">param_dict</span><span class="p">[</span><span class="n">par</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">eps</span>
+        <span class="k">if</span> <span class="s1">&#39;samples&#39;</span> <span class="ow">in</span> <span class="n">par</span><span class="p">:</span>
+            <span class="n">prob</span><span class="o">.</span><span class="n">param_dict</span><span class="p">[</span><span class="n">par</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">samples</span>
+    <span class="k">return</span></div>
+
+
+
 <div class="viewcode-block" id="WassDRExpectation">
 <a class="viewcode-back" href="../../cvxRiskOpt.html#cvxRiskOpt.wass_risk_opt_pb.WassDRExpectation">[docs]</a>
 <span class="k">class</span> <span class="nc">WassDRExpectation</span><span class="p">(</span><span class="n">WassWCEMaxAffine</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Provides a high-level implementation of the DR Expectation function.</span>
-<span class="sd">    sup_{P in \mathcal{P}} E^P[a * xi + b]</span>
-<span class="sd">    where a, b may contain decision variables</span>
+<span class="sd">    Provides a high-level implementation of the DR Expectation with a Wasserstein-based ambiguity set.</span>
+
+<span class="sd">    Implements</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \\sup_{\\mathbb{P} \\in \\mathcal{P}} \\quad \\mathbb{E}^\\mathbb{P} \\left[ \\langle a, \\xi \\rangle + b \\right]</span>
+
+<span class="sd">    where :math:`a, b` may contain decision variables and :math:`\\langle \\cdot, \\cdot \\rangle` is the inner product.</span>
+
+
+<span class="sd">    Arguments:</span>
+<span class="sd">    ----------</span>
+<span class="sd">        num_samples: int:</span>
+<span class="sd">            The number of samples.</span>
+<span class="sd">        a: int | float | cp.Variable | cp.Parameter | cp.Expression:</span>
+<span class="sd">            The &quot;a&quot; term in :math:`\\langle a, xi \\rangle + b`.</span>
+<span class="sd">        b: int | float | cp.Variable | cp.Parameter | cp.Expression, optional&quot;</span>
+<span class="sd">            The &quot;b&quot; term in :math:`\\langle a, xi \\rangle + b`. If not assigned, 0 is used.</span>
+<span class="sd">        support_C: np.ndarray, optional</span>
+<span class="sd">            The support matrix C. If None passed, the support is considered to be the real space.</span>
+<span class="sd">        support_d: np.ndarray, optional</span>
+<span class="sd">            The support vector d. If None passed, the support is considered to be the real space.</span>
+<span class="sd">        used_norm: int | np.inf, optional</span>
+<span class="sd">            The norm to be used. Either 1, 2, or infinity (np.inf). Default is 2.</span>
+<span class="sd">        vp_suffix: str, optional</span>
+<span class="sd">            The suffix for the variable/parameter names.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">instance_counter</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">support_C</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">support_d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">used_norm</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">vp_suffix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">a</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Parameter</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">,</span>
+                 <span class="n">b</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Parameter</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">support_C</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">support_d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">used_norm</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">vp_suffix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">WassDRExpectation</span><span class="o">.</span><span class="n">instance_counter</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">vp_suffix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">vp_suffix</span> <span class="o">=</span> <span class="s2">&quot;_WDRE&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">WassDRExpectation</span><span class="o">.</span><span class="n">instance_counter</span><span class="p">)</span>
+            <span class="n">vp_suffix</span> <span class="o">=</span> <span class="s2">&quot;_wdre&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">WassDRExpectation</span><span class="o">.</span><span class="n">instance_counter</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">b</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span>
@@ -346,30 +405,76 @@
 <a class="viewcode-back" href="../../cvxRiskOpt.html#cvxRiskOpt.wass_risk_opt_pb.WassDRCVaR">[docs]</a>
 <span class="k">class</span> <span class="nc">WassDRCVaR</span><span class="p">(</span><span class="n">WassWCEMaxAffine</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Provides a high-level implementation of the DR-CVaR function.</span>
+<span class="sd">    Provides a high-level implementation of the DR-CVaR with a Wasserstein-based ambiguity set.</span>
 
-<span class="sd">    sup_{P in \mathcal{P}} CVaR^P[a * xi + b]</span>
-<span class="sd">    where a, b may contain decision variables</span>
+<span class="sd">    Implements</span>
+
+<span class="sd">    .. math ::</span>
+
+<span class="sd">        \\sup_{\\mathbb{P} \\in \\mathcal{P}} \\quad  \\text{CVaR}_{\\alpha}^\\mathbb{P}\\left[ \\langle a, \\xi \\rangle + b \\right]</span>
+
+<span class="sd">    where :math:`a, b` may contain decision variables and :math:`\\langle \\cdot, \\cdot \\rangle` is the inner product.</span>
+<span class="sd">    :math:`\\alpha` is the CVaR level (average in alpha * 100% of the worst/highest cases)</span>
+
+<span class="sd">    Alternatively, this can also implement the CVaR reformulated form as a max of two affine terms:</span>
+
+<span class="sd">     .. math ::</span>
+
+<span class="sd">        \\sup_{\\mathbb{P} \\in \\mathcal{P}} \\quad  \\mathbb{E}^{\\mathbb{P}} \\max_{k \\in \\{1, 2\\}} \\left[ \\langle a_k, \\xi \\rangle + b_k \\right].</span>
+
+
+<span class="sd">    .. Note ::</span>
+
+<span class="sd">        Either &quot;a&quot; and &quot;b&quot; must be passed or &quot;a_k_list&quot; and &quot;b_k_list&quot;, but not both nor neither.</span>
+
+
+<span class="sd">    Arguments:</span>
+<span class="sd">    ----------</span>
+<span class="sd">        num_samples: int:</span>
+<span class="sd">            The number of samples.</span>
+<span class="sd">        xi_length: int:</span>
+<span class="sd">            Size of a sample. If :math:`\\xi` is m x 1 --&gt; xi_length = m</span>
+<span class="sd">        a: int | float | cp.Variable | cp.Parameter | cp.Expression, optional:</span>
+<span class="sd">            The &quot;a&quot; term in :math:`\\langle a, xi \\rangle + b`.</span>
+<span class="sd">            If this is passed, the &quot;b&quot; term is expected.</span>
+<span class="sd">            This should not be passed if &quot;a_k_list&quot; and &quot;b_k_list&quot; are passed.</span>
+<span class="sd">        b: int | float | cp.Variable | cp.Parameter | cp.Expression, optional, optional:</span>
+<span class="sd">            The &quot;b&quot; term in :math:`\\langle a, xi \\rangle + b`. If not assigned, 0 is used.</span>
+<span class="sd">            This should not be passed if &quot;a_k_list&quot; and &quot;b_k_list&quot; are passed.</span>
+<span class="sd">        a_k_list: Number | array_like, optional:</span>
+<span class="sd">            A list of vectors that are either constant vectors or scalars times a decision variable.</span>
+<span class="sd">            If this is passed, the &quot;b_k_list&quot; term is expected.</span>
+<span class="sd">            This should not be passed if &quot;a&quot; and &quot;b&quot; are passed.</span>
+<span class="sd">        b_k_list: array_like, optional:</span>
+<span class="sd">            A list of scalars or 1-dimensional cvxpy affine expressions.</span>
+<span class="sd">            This should not be passed if &quot;a&quot; and &quot;b&quot; are passed.</span>
+<span class="sd">        alpha: float, optional:</span>
+<span class="sd">            CVaR level (average in alpha * 100% of the worst/highest cases)</span>
+<span class="sd">        support_C: np.ndarray, optional</span>
+<span class="sd">            The support matrix C. If None passed, the support is considered to be the real space.</span>
+<span class="sd">        support_d: np.ndarray, optional</span>
+<span class="sd">            The support vector d. If None passed, the support is considered to be the real space.</span>
+<span class="sd">        used_norm: int | np.inf, optional</span>
+<span class="sd">            The norm to be used. Either 1, 2, or infinity (np.inf). Default is 2.</span>
+<span class="sd">        vp_suffix: str, optional</span>
+<span class="sd">            The suffix for the variable/parameter names.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">instance_counter</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">,</span> <span class="n">xi_length</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">a_k_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">b_k_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">support_C</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">support_d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">used_norm</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">vp_suffix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        :param num_samples:</span>
-<span class="sd">        :param a: a term in a * xi + b</span>
-<span class="sd">        :param b: b term in a * xi + b</span>
-<span class="sd">        :param a_k_list: a_k_list used in WassWCEMaxAffine</span>
-<span class="sd">        :param b_k_list: b_k_list used in WassWCEMaxAffine</span>
-<span class="sd">        :param alpha: CVaR level (average in alpha * 100% of the worst/highest cases)</span>
-<span class="sd">        :param xi_length: size of a sample. If xi is m x 1 --&gt; xi_length = m</span>
-<span class="sd">        :param support_C: C term in support of random variable {xi | C*xi &lt;= d}</span>
-<span class="sd">        :param support_d: d term in support of random variable {xi | C*xi &lt;= d}</span>
-<span class="sd">        :param used_norm: norm being used</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">xi_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">a</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Parameter</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">b</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Parameter</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">a_k_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">b_k_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                 <span class="n">support_C</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">support_d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">used_norm</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">vp_suffix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
         <span class="n">WassDRCVaR</span><span class="o">.</span><span class="n">instance_counter</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">vp_suffix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">vp_suffix</span> <span class="o">=</span> <span class="s2">&quot;_WDRCVAR&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">WassDRCVaR</span><span class="o">.</span><span class="n">instance_counter</span><span class="p">)</span>
+            <span class="n">vp_suffix</span> <span class="o">=</span> <span class="s2">&quot;_wdrcvar&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">WassDRCVaR</span><span class="o">.</span><span class="n">instance_counter</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_alpha</span> <span class="o">=</span> <span class="n">alpha</span>
 
@@ -453,20 +558,17 @@
 
 
 <h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install/index.html">Install</a></li>
+</ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">cvxRiskOpt</a></li>
 </ul>
-
-<div class="relations">
-<h3>Related Topics</h3>
 <ul>
-  <li><a href="../../index.html">Documentation overview</a><ul>
-  <li><a href="../index.html">Module code</a><ul>
-  </ul></li>
-  </ul></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
 </ul>
-</div>
+
+
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
@@ -477,14 +579,6 @@
     </div>
 </div>
 <script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
-
-
         </div>
       </div>
       <div class="clearer"></div>

@@ -14,7 +14,7 @@
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="User Guide" href="tutorial/index.html" />
+    <link rel="next" title="Examples" href="examples/index.html" />
     <link rel="prev" title="cvxRiskOpt" href="modules.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -42,7 +42,7 @@
 <span id="cvxriskopt-cclp-risk-opt-module"></span><h2>cvxRiskOpt.cclp_risk_opt module<a class="headerlink" href="#module-cvxRiskOpt.cclp_risk_opt" title="Link to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="cvxRiskOpt.cclp_risk_opt.cclp_dro_mean_cov">
-<span class="sig-prename descclassname"><span class="pre">cvxRiskOpt.cclp_risk_opt.</span></span><span class="sig-name descname"><span class="pre">cclp_dro_mean_cov</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi1_hat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi2_hat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gam11</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gam12</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gam22</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assume_sym</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assume_psd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centrally_symmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cvxRiskOpt/cclp_risk_opt.html#cclp_dro_mean_cov"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cvxRiskOpt.cclp_risk_opt.cclp_dro_mean_cov" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cvxRiskOpt.cclp_risk_opt.</span></span><span class="sig-name descname"><span class="pre">cclp_dro_mean_cov</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Variable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Expression</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Variable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Expression</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi1_hat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Variable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Expression</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi2_hat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gam11</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gam12</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gam22</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assume_sym</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assume_psd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centrally_symmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cvxRiskOpt/cclp_risk_opt.html#cclp_dro_mean_cov"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cvxRiskOpt.cclp_risk_opt.cclp_dro_mean_cov" title="Link to this definition">¶</a></dt>
 <dd><p>Reformulates a DRO CC of the type
 <span class="math notranslate nohighlight">\(\inf_{\mathbb{P} \in \mathcal{P}} \mathbb{P}(a^T \xi_1 + b + \xi_2 \leq 0) \geq 1-\epsilon\)</span>
 where <span class="math notranslate nohighlight">\(\mathcal{P}\)</span> is a moment-based ambiguity set.</p>
@@ -54,34 +54,50 @@ is unknown but belongs to a moment based ambiguity set with known mean and covar
 \text{Expect}(\xi) &amp;= [\hat{\xi_1}^T \hat{\xi_2}]^T \\
 \text{Cov}(\xi) &amp;= \begin{bmatrix} \text{gam11} &amp; \text{gam12} \\ \text{gam12}^T &amp; \text{gam22} \end{bmatrix}
 \end{align*}\end{split}\]</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>eps</strong> (<em>float</em>) – The epsilon value in the chance constraint.</p></li>
-<li><p><strong>a</strong> (<em>array_like</em><em>, </em><em>optional</em>) – The coefficient vector a in the chance constraint.</p></li>
-<li><p><strong>b</strong> (<em>float</em><em>, </em><em>optional</em>) – The constant term b in the chance constraint.</p></li>
-<li><p><strong>xi1_hat</strong> (<em>array_like</em><em>, </em><em>optional</em>) – The expected value of xi1.</p></li>
-<li><p><strong>xi2_hat</strong> (<em>array_like</em><em>, </em><em>optional</em>) – The expected value of xi2.</p></li>
-<li><p><strong>gam11</strong> (<em>array_like</em><em>, </em><em>optional</em>) – The covariance matrix of xi1.</p></li>
-<li><p><strong>gam12</strong> (<em>array_like</em><em>, </em><em>optional</em>) – The cross-covariance matrix between xi1 and xi2.</p></li>
-<li><p><strong>gam22</strong> (<em>array_like</em><em>, </em><em>optional</em>) – The covariance matrix of xi2.</p></li>
-<li><p><strong>assume_sym</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to assume the covariance matrix is symmetric.</p></li>
-<li><p><strong>assume_psd</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to assume the covariance matrix is positive semi-definite.</p></li>
-<li><p><strong>centrally_symmetric</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag if distribution is centrally symmetric (Def 3.1).</p></li>
-</ul>
+<section id="arguments">
+<h3>Arguments:<a class="headerlink" href="#arguments" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>eps<span class="classifier">int | float:</span></dt><dd><p>The epsilon risk bound in the chance constraint.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The reformulated chance constraint.</p>
+<dt>a<span class="classifier">int | float | list | np.ndarray | cp.Variable | cp.Expression, optional:</span></dt><dd><p>The coefficient vector/scalar “a” in the chance constraint.</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>cvxpy.Constraint or cvxpy.Expression</p>
+<dt>b<span class="classifier">int | float | cp.Variable | cp.Expression, optional:</span></dt><dd><p>The scalar term “b” in the chance constraint.</p>
+</dd>
+<dt>xi1_hat<span class="classifier">int | float | list | np.ndarray | cp.Variable | cp.Expression, optional:</span></dt><dd><p>The expected value of xi1.</p>
+</dd>
+<dt>xi2_hat<span class="classifier">int | float, optional:</span></dt><dd><p>The expected value of xi2.</p>
+</dd>
+<dt>gam11<span class="classifier">int | float | list | np.ndarray, optional:</span></dt><dd><p>The covariance matrix of xi1.</p>
+</dd>
+<dt>gam12<span class="classifier">int | float | list | np.ndarray, optional:</span></dt><dd><p>The cross-covariance matrix between xi1 and xi2.</p>
+</dd>
+<dt>gam22<span class="classifier">int | float, optional:</span></dt><dd><p>The covariance matrix of xi2.</p>
+</dd>
+<dt>assume_sym<span class="classifier">bool, optional:</span></dt><dd><p>Whether to assume the covariance matrix is symmetric (otherwise, it is checked).</p>
+</dd>
+<dt>assume_psd<span class="classifier">bool, optional:</span></dt><dd><p>Whether to assume the covariance matrix is positive semi-definite (otherwise, it is checked).</p>
+</dd>
+<dt>centrally_symmetric: bool, optional:</dt><dd><p>Flag if distribution is centrally symmetric
+(Def 3.1 in “On Distributionally Robust Chance-Constrained Linear Programs”).</p>
 </dd>
 </dl>
+</div></blockquote>
+</section>
+<section id="returns">
+<h3>Returns:<a class="headerlink" href="#returns" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>cvxpy.Constraint or cp.Expression:</dt><dd><p>The reformulated deterministic chance constraint.</p>
+</dd>
+</dl>
+</div></blockquote>
+</section>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cvxRiskOpt.cclp_risk_opt.cclp_gauss">
-<span class="sig-prename descclassname"><span class="pre">cvxRiskOpt.cclp_risk_opt.</span></span><span class="sig-name descname"><span class="pre">cclp_gauss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi1_hat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi2_hat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gam11</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gam12</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gam22</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assume_sym</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assume_psd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cvxRiskOpt/cclp_risk_opt.html#cclp_gauss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cvxRiskOpt.cclp_risk_opt.cclp_gauss" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">cvxRiskOpt.cclp_risk_opt.</span></span><span class="sig-name descname"><span class="pre">cclp_gauss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Variable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Expression</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Variable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Expression</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi1_hat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Variable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Expression</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi2_hat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gam11</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gam12</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gam22</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assume_sym</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assume_psd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cvxRiskOpt/cclp_risk_opt.html#cclp_gauss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cvxRiskOpt.cclp_risk_opt.cclp_gauss" title="Link to this definition">¶</a></dt>
 <dd><p>Reformulates a CC of the type
 <span class="math notranslate nohighlight">\(\mathbb{P}(a^T \xi_1 + b + \xi_2 \leq 0) \geq 1-\epsilon\)</span>
 where the distribution is Gaussian.</p>
@@ -92,28 +108,42 @@ where the distribution is Gaussian.</p>
 \text{Expect}(\xi) &amp;= [\hat{\xi_1}^T \hat{\xi_2}]^T \\
 \text{Cov}(\xi) &amp;= \begin{bmatrix} \text{gam11} &amp; \text{gam12} \\ \text{gam12}^T &amp; \text{gam22} \end{bmatrix}
 \end{align*}\end{split}\]</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>eps</strong> (<em>float</em>) – The epsilon value in the chance constraint.</p></li>
-<li><p><strong>a</strong> (<em>array_like</em><em>, </em><em>optional</em>) – The coefficient vector a in the chance constraint.</p></li>
-<li><p><strong>b</strong> (<em>float</em><em>, </em><em>optional</em>) – The constant term b in the chance constraint.</p></li>
-<li><p><strong>xi1_hat</strong> (<em>array_like</em><em>, </em><em>optional</em>) – The expected value of xi1.</p></li>
-<li><p><strong>xi2_hat</strong> (<em>array_like</em><em>, </em><em>optional</em>) – The expected value of xi2.</p></li>
-<li><p><strong>gam11</strong> (<em>array_like</em><em>, </em><em>optional</em>) – The covariance matrix of xi1.</p></li>
-<li><p><strong>gam12</strong> (<em>array_like</em><em>, </em><em>optional</em>) – The cross-covariance matrix between xi1 and xi2.</p></li>
-<li><p><strong>gam22</strong> (<em>array_like</em><em>, </em><em>optional</em>) – The covariance matrix of xi2.</p></li>
-<li><p><strong>assume_sym</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to assume the covariance matrix is symmetric.</p></li>
-<li><p><strong>assume_psd</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to assume the covariance matrix is positive semi-definite.</p></li>
-</ul>
+<section id="id1">
+<h3>Arguments:<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>eps<span class="classifier">int | float:</span></dt><dd><p>The epsilon risk bound in the chance constraint.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The reformulated chance constraint.</p>
+<dt>a<span class="classifier">int | float | list | np.ndarray | cp.Variable | cp.Expression, optional:</span></dt><dd><p>The coefficient vector/scalar “a” in the chance constraint.</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>cvxpy.Constraint or cp.Expression</p>
+<dt>b<span class="classifier">int | float | cp.Variable | cp.Expression, optional:</span></dt><dd><p>The scalar term “b” in the chance constraint.</p>
+</dd>
+<dt>xi1_hat<span class="classifier">int | float | list | np.ndarray | cp.Variable | cp.Expression, optional:</span></dt><dd><p>The expected value of xi1.</p>
+</dd>
+<dt>xi2_hat<span class="classifier">int | float, optional:</span></dt><dd><p>The expected value of xi2.</p>
+</dd>
+<dt>gam11<span class="classifier">int | float | list | np.ndarray, optional:</span></dt><dd><p>The covariance matrix of xi1.</p>
+</dd>
+<dt>gam12<span class="classifier">int | float | list | np.ndarray, optional:</span></dt><dd><p>The cross-covariance matrix between xi1 and xi2.</p>
+</dd>
+<dt>gam22<span class="classifier">int | float, optional:</span></dt><dd><p>The covariance matrix of xi2.</p>
+</dd>
+<dt>assume_sym<span class="classifier">bool, optional:</span></dt><dd><p>Whether to assume the covariance matrix is symmetric (otherwise, it is checked).</p>
+</dd>
+<dt>assume_psd<span class="classifier">bool, optional:</span></dt><dd><p>Whether to assume the covariance matrix is positive semi-definite (otherwise, it is checked).</p>
 </dd>
 </dl>
+</div></blockquote>
+</section>
+<section id="id2">
+<h3>Returns:<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>cvxpy.Constraint or cp.Expression:</dt><dd><p>The reformulated deterministic chance constraint.</p>
+</dd>
+</dl>
+</div></blockquote>
+</section>
 </dd></dl>
 
 </section>
@@ -123,70 +153,137 @@ where the distribution is Gaussian.</p>
 <dt class="sig sig-object py" id="cvxRiskOpt.mpc_helpers.cp_var_mat_to_list">
 <span class="sig-prename descclassname"><span class="pre">cvxRiskOpt.mpc_helpers.</span></span><span class="sig-name descname"><span class="pre">cp_var_mat_to_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Variable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cvxRiskOpt/mpc_helpers.html#cp_var_mat_to_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cvxRiskOpt.mpc_helpers.cp_var_mat_to_list" title="Link to this definition">¶</a></dt>
 <dd><p>Converts a 1D or 2D cp.Variable/Parameter matrix to a list of cp.Variable/Parameter vectors.</p>
-<p>E.g.
-(3, 4) matrix where horizon is 4 turns into [(3,), (3,), (3,), (3,)].
-(3,) of horizon 1 turns into [(3,)]
-(4,) where 4 is horizon turns into [(), (), (), ()]</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>mat</strong> (<em>cp.Variable</em><em> | </em><em>cp.Parameter</em>) – (m, horizon), (horizon, m), (m,), or (horizon,) cp.Variable</p></li>
-<li><p><strong>horizon</strong> (<em>int</em>) – horizon (e.g. MPC horizon).</p></li>
+<p>Some functions, such as lin_mpc_expect_xQx, require lists or arrays of variables/parameters over time as inputs.
+This function splits a variable/parameter into a list of variables/parameters.
+e.g.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>(3, 4) matrix where the horizon is 4 –&gt; turns into [(3,), (3,), (3,), (3,)].</p></li>
+<li><p>(3,) of horizon 1 –&gt; turns into [(3,)]</p></li>
+<li><p>(4,) where 4 is horizon –&gt; turns into [(), (), (), ()]</p></li>
 </ul>
+</div></blockquote>
+<section id="id3">
+<h3>Arguments:<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>mat: cp.Variable | cp.Parameter:</dt><dd><p>(m, horizon), (horizon, m), (m,), or (horizon,) cp.Variable</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p></p>
+<dt>horizon: int:</dt><dd><p>mat horizon, e.g. MPC horizon (to identify the “horizon” dimension in mat)</p>
 </dd>
 </dl>
+</div></blockquote>
+</section>
+<section id="id4">
+<h3>Returns:<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>list:</dt><dd><p>List of cp.Variables or cp.Parameters</p>
+</dd>
+</dl>
+</div></blockquote>
+</section>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cvxRiskOpt.mpc_helpers.expect_cov_x_t">
-<span class="sig-prename descclassname"><span class="pre">cvxRiskOpt.mpc_helpers.</span></span><span class="sig-name descname"><span class="pre">expect_cov_x_t</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0_mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Variable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Parameter</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0_cov</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_cov</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cvxRiskOpt/mpc_helpers.html#expect_cov_x_t"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cvxRiskOpt.mpc_helpers.expect_cov_x_t" title="Link to this definition">¶</a></dt>
-<dd><p>Computes the expected next state E(x_{t}) and its covariance Cov(x_{t})
-for a linear system x_{t+1} = Ax_t + Bu_t + w_t.
-E(x_{t}) = A^{t} x0_mean + sum_{i=0}^{t-1} (A^i B u_{t-1-i} + A^i w_{t-1-i}_mean)
-Cov(x_{t}) = A^{t} x0_cov A^{t}^T + sum_{i=0}^{t-1} (A^i w_{t-1-i}_cov A^i^T)
-:param t: current time step for x_t (t &gt;= 1)
-:param A: dynamics matrix
-:param B: input matrix
-:param x0_mean: mean state at t=0
-:param x0_cov: covariance of state at t=0
-:param u: list of control decision variables
-:param w_mean: list of noise mean value
-:param w_cov: list of noise covariance values
-:return:</p>
+<span class="sig-prename descclassname"><span class="pre">cvxRiskOpt.mpc_helpers.</span></span><span class="sig-name descname"><span class="pre">expect_cov_x_t</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0_mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Variable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Parameter</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0_cov</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_cov</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cvxRiskOpt/mpc_helpers.html#expect_cov_x_t"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cvxRiskOpt.mpc_helpers.expect_cov_x_t" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the expressions for the expected next state <span class="math notranslate nohighlight">\(\mathbb{E}(x_{t})\)</span> and its covariance <span class="math notranslate nohighlight">\(\text{Cov}(x_t)\)</span>
+for a linear system <span class="math notranslate nohighlight">\(x_{t+1} = Ax_t + Bu_t + w_t\)</span>.</p>
+<p>The expected value and covariance are found by recursively applying the dynamics stating from an initial state <span class="math notranslate nohighlight">\(x_0\)</span>
+whose mean <span class="math notranslate nohighlight">\(\overline{x}_0\)</span> and covariance <span class="math notranslate nohighlight">\(\Sigma_{x_0}\)</span> are known.
+The mean <span class="math notranslate nohighlight">\(\overline{w}\)</span> and covariance <span class="math notranslate nohighlight">\(\Sigma_{w}\)</span> of the noise must also be known.
+The terms are computed as follows:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align*}
+\mathbb{E}(x_{t}) &amp;= A^{t} \overline{x}_0 + \sum_{i=0}^{t-1} (A^i B u_{t-1-i} + A^i \overline{w}_{t-1-i}) \\
+\text{Cov}(x_{t}) &amp;= A^{t} \Sigma_{x_0} {A^{t}}^T + \sum_{i=0}^{t-1} (A^i \Sigma_{w_{t-1-i}} {A^i}^T)
+\end{align*}\end{split}\]</div>
+<section id="id5">
+<h3>Arguments:<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>t: int:</dt><dd><p>Current time step for x_t (t &gt;= 1)</p>
+</dd>
+<dt>A: int | float | np.ndarray:</dt><dd><p>Dynamics matrix</p>
+</dd>
+<dt>B: int | float | np.ndarray:</dt><dd><p>Input matrix</p>
+</dd>
+<dt>x0_mean: cp.Variable | cp.Parameter | cp.Expression:</dt><dd><p>Mean state at t=0</p>
+</dd>
+<dt>x0_cov: np.ndarray:</dt><dd><p>Covariance of state at t=0</p>
+</dd>
+<dt>u: list:</dt><dd><p>List of control decision variables</p>
+</dd>
+<dt>w_mean: list:</dt><dd><p>List of noise mean value</p>
+</dd>
+<dt>w_cov: list:</dt><dd><p>List of noise covariance values</p>
+</dd>
+</dl>
+</div></blockquote>
+</section>
+<section id="id6">
+<h3>Returns:<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>cp.Expression:</dt><dd><p>Expected value expression of the state at time t (xt_mean)</p>
+</dd>
+<dt>cp.Expression:</dt><dd><p>Covariance expression of the state at time t (xt_cov)</p>
+</dd>
+</dl>
+</div></blockquote>
+</section>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="cvxRiskOpt.mpc_helpers.lin_mpc_expect_xQx">
 <span class="sig-prename descclassname"><span class="pre">cvxRiskOpt.mpc_helpers.</span></span><span class="sig-name descname"><span class="pre">lin_mpc_expect_xQx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0_mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Parameter</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Variable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0_cov</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_cov</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cvxRiskOpt/mpc_helpers.html#lin_mpc_expect_xQx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cvxRiskOpt.mpc_helpers.lin_mpc_expect_xQx" title="Link to this definition">¶</a></dt>
-<dd><p>Finds the E(x_t^T Q x_t) term.</p>
-<p>Finds the E(x_t^T Q x_t)
+<dd><p>Finds the expression for <span class="math notranslate nohighlight">\(\mathbb{E}(x_t^T Q x_t)\)</span>, the weighted quadratic state cost at time <span class="math notranslate nohighlight">\(t\)</span>.</p>
+<p>Finds the expression for <span class="math notranslate nohighlight">\(\mathbb{E}(x_t^T Q x_t)\)</span>
 where
-x_t is a random variable at timestep t in the MPC horizon
+<span class="math notranslate nohighlight">\(x_t\)</span> is a random variable (due to the noise) representing the state at timestep <span class="math notranslate nohighlight">\(t\)</span> in the MPC horizon
 and
 the dynamics are:
-x_{t+1} = Ax_t + Bu_t + w_t.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>t</strong> – current control time step (starting from 0)</p></li>
-<li><p><strong>horizon</strong> – MPC horizon length</p></li>
-<li><p><strong>A</strong> – dynamics matrix</p></li>
-<li><p><strong>B</strong> – input matrix</p></li>
-<li><p><strong>u</strong> – list of control decision variables (or cp Variable)</p></li>
-<li><p><strong>Q</strong> – state cost matrix x^T Q x</p></li>
-<li><p><strong>x0_mean</strong> – mean state at t=0</p></li>
-<li><p><strong>x0_cov</strong> – covariance of state at t=0</p></li>
-<li><p><strong>w_mean</strong> – list of noise mean value (or single noise mean)</p></li>
-<li><p><strong>w_cov</strong> – list of noise covariance values (or single noise covar)</p></li>
-</ul>
+<span class="math notranslate nohighlight">\(x_{t+1} = Ax_t + Bu_t + w_t\)</span>.</p>
+<section id="id7">
+<h3>Arguments:<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>t: int:</dt><dd><p>Control time step (starting from 0)</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p></p>
+<dt>horizon: int:</dt><dd><p>MPC horizon length</p>
+</dd>
+<dt>A: int | float | np.ndarray:</dt><dd><p>Dynamics matrix</p>
+</dd>
+<dt>B: int | float | np.ndarray:</dt><dd><p>Input matrix</p>
+</dd>
+<dt>u: list | cp.Variable</dt><dd><p>List of control decision variables (or cp Variable)</p>
+</dd>
+<dt>Q: int | float | np.ndarray:</dt><dd><p>State cost matrix</p>
+</dd>
+<dt>x0_mean: cp.Parameter | cp.Variable | cp.Expression:</dt><dd><p>Mean state at <span class="math notranslate nohighlight">\(t=0\)</span></p>
+</dd>
+<dt>x0_cov: np.ndarray, optional:</dt><dd><p>Covariance of state at <span class="math notranslate nohighlight">\(t=0\)</span>. If not passed, assumed to be zero.</p>
+</dd>
+<dt>w_mean: list | np.ndarray, optional:</dt><dd><p>List of noise mean value (or single noise mean). If not passed, assumed to be zero.</p>
+</dd>
+<dt>w_cov: list | np.ndarray, optional:</dt><dd><p>List of noise covariance values (or single noise covar). If not passed, assumed to be zero.</p>
 </dd>
 </dl>
+</div></blockquote>
+</section>
+<section id="id8">
+<h3>Returns:<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>cp.Expression:</dt><dd><p>Expression for <span class="math notranslate nohighlight">\(\mathbb{E}(x_t^T Q x_t)\)</span></p>
+</dd>
+<dt>dict:</dt><dd><p>dictionary containing the expressions for the mean and covariance of the state at time <span class="math notranslate nohighlight">\(t\)</span>
+(“x_mean”, “x_cov”)</p>
+</dd>
+</dl>
+</div></blockquote>
+</section>
 </dd></dl>
 
 </section>
@@ -194,65 +291,168 @@ x_{t+1} = Ax_t + Bu_t + w_t.</p>
 <span id="cvxriskopt-wass-risk-opt-pb-module"></span><h2>cvxRiskOpt.wass_risk_opt_pb module<a class="headerlink" href="#module-cvxRiskOpt.wass_risk_opt_pb" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="cvxRiskOpt.wass_risk_opt_pb.WassDRCVaR">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cvxRiskOpt.wass_risk_opt_pb.</span></span><span class="sig-name descname"><span class="pre">WassDRCVaR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_k_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_k_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support_C</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support_d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">used_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vp_suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cvxRiskOpt/wass_risk_opt_pb.html#WassDRCVaR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cvxRiskOpt.wass_risk_opt_pb.WassDRCVaR" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cvxRiskOpt.wass_risk_opt_pb.</span></span><span class="sig-name descname"><span class="pre">WassDRCVaR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Variable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Parameter</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Expression</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Variable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Parameter</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Expression</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_k_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_k_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support_C</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support_d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">used_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vp_suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cvxRiskOpt/wass_risk_opt_pb.html#WassDRCVaR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cvxRiskOpt.wass_risk_opt_pb.WassDRCVaR" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#cvxRiskOpt.wass_risk_opt_pb.WassWCEMaxAffine" title="cvxRiskOpt.wass_risk_opt_pb.WassWCEMaxAffine"><code class="xref py py-class docutils literal notranslate"><span class="pre">WassWCEMaxAffine</span></code></a></p>
-<p>Provides a high-level implementation of the DR-CVaR function.</p>
-<p>sup_{P in mathcal{P}} CVaR^P[a * xi + b]
-where a, b may contain decision variables</p>
+<p>Provides a high-level implementation of the DR-CVaR with a Wasserstein-based ambiguity set.</p>
+<p>Implements</p>
+<div class="math notranslate nohighlight">
+\[\sup_{\mathbb{P} \in \mathcal{P}} \quad  \text{CVaR}_{\alpha}^\mathbb{P}\left[ \langle a, \xi \rangle + b \right]\]</div>
+<p>where <span class="math notranslate nohighlight">\(a, b\)</span> may contain decision variables and <span class="math notranslate nohighlight">\(\langle \cdot, \cdot \rangle\)</span> is the inner product.
+<span class="math notranslate nohighlight">\(\alpha\)</span> is the CVaR level (average in alpha * 100% of the worst/highest cases)</p>
+<p>Alternatively, this can also implement the CVaR reformulated form as a max of two affine terms:</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[\sup_{\mathbb{P} \in \mathcal{P}} \quad  \mathbb{E}^{\mathbb{P}} \max_{k \in \{1, 2\}} \left[ \langle a_k, \xi \rangle + b_k \right].\]</div>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Either “a” and “b” must be passed or “a_k_list” and “b_k_list”, but not both nor neither.</p>
+</div>
+<section id="id9">
+<h3>Arguments:<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>num_samples: int:</dt><dd><p>The number of samples.</p>
+</dd>
+<dt>xi_length: int:</dt><dd><p>Size of a sample. If <span class="math notranslate nohighlight">\(\xi\)</span> is m x 1 –&gt; xi_length = m</p>
+</dd>
+<dt>a: int | float | cp.Variable | cp.Parameter | cp.Expression, optional:</dt><dd><p>The “a” term in <span class="math notranslate nohighlight">\(\langle a, xi \rangle + b\)</span>.
+If this is passed, the “b” term is expected.
+This should not be passed if “a_k_list” and “b_k_list” are passed.</p>
+</dd>
+<dt>b: int | float | cp.Variable | cp.Parameter | cp.Expression, optional, optional:</dt><dd><p>The “b” term in <span class="math notranslate nohighlight">\(\langle a, xi \rangle + b\)</span>. If not assigned, 0 is used.
+This should not be passed if “a_k_list” and “b_k_list” are passed.</p>
+</dd>
+<dt>a_k_list: Number | array_like, optional:</dt><dd><p>A list of vectors that are either constant vectors or scalars times a decision variable.
+If this is passed, the “b_k_list” term is expected.
+This should not be passed if “a” and “b” are passed.</p>
+</dd>
+<dt>b_k_list: array_like, optional:</dt><dd><p>A list of scalars or 1-dimensional cvxpy affine expressions.
+This should not be passed if “a” and “b” are passed.</p>
+</dd>
+<dt>alpha: float, optional:</dt><dd><p>CVaR level (average in alpha * 100% of the worst/highest cases)</p>
+</dd>
+<dt>support_C: np.ndarray, optional</dt><dd><p>The support matrix C. If None passed, the support is considered to be the real space.</p>
+</dd>
+<dt>support_d: np.ndarray, optional</dt><dd><p>The support vector d. If None passed, the support is considered to be the real space.</p>
+</dd>
+<dt>used_norm: int | np.inf, optional</dt><dd><p>The norm to be used. Either 1, 2, or infinity (np.inf). Default is 2.</p>
+</dd>
+<dt>vp_suffix: str, optional</dt><dd><p>The suffix for the variable/parameter names.</p>
+</dd>
+</dl>
+</div></blockquote>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cvxRiskOpt.wass_risk_opt_pb.WassDRCVaR.instance_counter">
 <span class="sig-name descname"><span class="pre">instance_counter</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#cvxRiskOpt.wass_risk_opt_pb.WassDRCVaR.instance_counter" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+</section>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="cvxRiskOpt.wass_risk_opt_pb.WassDRExpectation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cvxRiskOpt.wass_risk_opt_pb.</span></span><span class="sig-name descname"><span class="pre">WassDRExpectation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support_C</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support_d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">used_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vp_suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cvxRiskOpt/wass_risk_opt_pb.html#WassDRExpectation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cvxRiskOpt.wass_risk_opt_pb.WassDRExpectation" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cvxRiskOpt.wass_risk_opt_pb.</span></span><span class="sig-name descname"><span class="pre">WassDRExpectation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Variable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Parameter</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Variable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Parameter</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Expression</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support_C</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support_d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">used_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vp_suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cvxRiskOpt/wass_risk_opt_pb.html#WassDRExpectation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cvxRiskOpt.wass_risk_opt_pb.WassDRExpectation" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#cvxRiskOpt.wass_risk_opt_pb.WassWCEMaxAffine" title="cvxRiskOpt.wass_risk_opt_pb.WassWCEMaxAffine"><code class="xref py py-class docutils literal notranslate"><span class="pre">WassWCEMaxAffine</span></code></a></p>
-<p>Provides a high-level implementation of the DR Expectation function.
-sup_{P in mathcal{P}} E^P[a * xi + b]
-where a, b may contain decision variables</p>
+<p>Provides a high-level implementation of the DR Expectation with a Wasserstein-based ambiguity set.</p>
+<p>Implements</p>
+<div class="math notranslate nohighlight">
+\[\sup_{\mathbb{P} \in \mathcal{P}} \quad \mathbb{E}^\mathbb{P} \left[ \langle a, \xi \rangle + b \right]\]</div>
+<p>where <span class="math notranslate nohighlight">\(a, b\)</span> may contain decision variables and <span class="math notranslate nohighlight">\(\langle \cdot, \cdot \rangle\)</span> is the inner product.</p>
+<section id="id10">
+<h3>Arguments:<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>num_samples: int:</dt><dd><p>The number of samples.</p>
+</dd>
+<dt>a: int | float | cp.Variable | cp.Parameter | cp.Expression:</dt><dd><p>The “a” term in <span class="math notranslate nohighlight">\(\langle a, xi \rangle + b\)</span>.</p>
+</dd>
+<dt>b: int | float | cp.Variable | cp.Parameter | cp.Expression, optional”</dt><dd><p>The “b” term in <span class="math notranslate nohighlight">\(\langle a, xi \rangle + b\)</span>. If not assigned, 0 is used.</p>
+</dd>
+<dt>support_C: np.ndarray, optional</dt><dd><p>The support matrix C. If None passed, the support is considered to be the real space.</p>
+</dd>
+<dt>support_d: np.ndarray, optional</dt><dd><p>The support vector d. If None passed, the support is considered to be the real space.</p>
+</dd>
+<dt>used_norm: int | np.inf, optional</dt><dd><p>The norm to be used. Either 1, 2, or infinity (np.inf). Default is 2.</p>
+</dd>
+<dt>vp_suffix: str, optional</dt><dd><p>The suffix for the variable/parameter names.</p>
+</dd>
+</dl>
+</div></blockquote>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cvxRiskOpt.wass_risk_opt_pb.WassDRExpectation.instance_counter">
 <span class="sig-name descname"><span class="pre">instance_counter</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#cvxRiskOpt.wass_risk_opt_pb.WassDRExpectation.instance_counter" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+</section>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="cvxRiskOpt.wass_risk_opt_pb.WassWCEMaxAffine">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cvxRiskOpt.wass_risk_opt_pb.</span></span><span class="sig-name descname"><span class="pre">WassWCEMaxAffine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_k_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_k_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support_C</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support_d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">used_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vp_suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cvxRiskOpt/wass_risk_opt_pb.html#WassWCEMaxAffine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cvxRiskOpt.wass_risk_opt_pb.WassWCEMaxAffine" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cvxRiskOpt.wass_risk_opt_pb.</span></span><span class="sig-name descname"><span class="pre">WassWCEMaxAffine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_k_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_k_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support_C</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support_d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">used_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vp_suffix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cvxRiskOpt/wass_risk_opt_pb.html#WassWCEMaxAffine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cvxRiskOpt.wass_risk_opt_pb.WassWCEMaxAffine" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Problem</span></code></p>
-<p>Wasserstein Worst Case Expectation with Max of Affine terms.</p>
-<p>This class implements a generic solution for Cor 5.1 (i), eq (15a) with affine loss functions:
-l = max_k {a_k &#64; xi + b_k}
-where
-xi (m x 1): the random variable for which we have samples
-a_k (m x 1): a vector that is either a constant vector or a scalar times a decision variable (cvxpy affine expression)
-b_k (1 x 1): a scalar or a 1-dimensional cvxpy affine expression</p>
+<p>Wasserstein Worst Case Expectation Problem with Max of Affine Terms.</p>
+<p>This class implements a generic solution for Cor 5.1 (i), eq (15a) with affine loss functions:</p>
+<div class="math notranslate nohighlight">
+\[\ell = \max_k \{ \langle a_k,  \xi \rangle + b_k \}\]</div>
+<dl class="simple">
+<dt>where</dt><dd><ul class="simple">
+<li><p>xi (m x 1): the random variable for which we have samples</p></li>
+<li><p>a_k (m x 1): a vector that is either a constant vector or a scalar times a decision variable (cvxpy affine expression)</p></li>
+<li><p>b_k (1 x 1): a scalar or a 1-dimensional cvxpy affine expression</p></li>
+<li><p><span class="math notranslate nohighlight">\(\langle \cdot, \cdot \rangle\)</span> is the inner product</p></li>
+</ul>
+</dd>
+</dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Currently, this is only implemented for the 1-, 2-, and inf-norm cases.</p>
 </div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>num_samples</strong> (<em>int</em>) – The number of samples.</p></li>
-<li><p><strong>a_k_list</strong> (<em>list</em><em> of </em><em>array_like</em><em> or </em><em>cvxpy.AffineExpression</em>) – A list of vectors that are either constant vectors or scalars times a decision variable.</p></li>
-<li><p><strong>b_k_list</strong> (<em>list</em><em> of </em><em>float</em><em> or </em><em>cvxpy.AffineExpression</em><em>, </em><em>optional</em>) – A list of scalars or 1-dimensional cvxpy affine expressions.</p></li>
-<li><p><strong>support_C</strong> (<em>array_like</em><em>, </em><em>optional</em>) – The support matrix C.</p></li>
-<li><p><strong>support_d</strong> (<em>array_like</em><em>, </em><em>optional</em>) – The support vector d.</p></li>
-<li><p><strong>used_norm</strong> (<em>int</em><em>, </em><em>optional</em>) – The norm to be used. Default is 2.</p></li>
-<li><p><strong>vp_suffix</strong> (<em>str</em><em>, </em><em>optional</em>) – The suffix for the variable prefix.</p></li>
-</ul>
+<section id="id11">
+<h3>Arguments:<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>num_samples: int:</dt><dd><p>The number of samples.</p>
+</dd>
+<dt>a_k_list: Number | array_like</dt><dd><p>A list of vectors that are either constant vectors or scalars times a decision variable.</p>
+</dd>
+<dt>b_k_list: array_like</dt><dd><p>A list of scalars or 1-dimensional cvxpy affine expressions.</p>
+</dd>
+<dt>support_C: np.ndarray, optional</dt><dd><p>The support matrix C. If None passed, the support is considered to be the real space.</p>
+</dd>
+<dt>support_d: np.ndarray, optional</dt><dd><p>The support vector d. If None passed, the support is considered to be the real space.</p>
+</dd>
+<dt>used_norm: int | np.inf, optional</dt><dd><p>The norm to be used. Either 1, 2, or infinity (np.inf). Default is 2.</p>
+</dd>
+<dt>vp_suffix: str, optional</dt><dd><p>The suffix for the variable/parameter names.</p>
 </dd>
 </dl>
+</div></blockquote>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="cvxRiskOpt.wass_risk_opt_pb.WassWCEMaxAffine.instance_counter">
 <span class="sig-name descname"><span class="pre">instance_counter</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#cvxRiskOpt.wass_risk_opt_pb.WassWCEMaxAffine.instance_counter" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvxRiskOpt.wass_risk_opt_pb.update_wass_wce_params">
+<span class="sig-prename descclassname"><span class="pre">cvxRiskOpt.wass_risk_opt_pb.</span></span><span class="sig-name descname"><span class="pre">update_wass_wce_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prob</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/cvxRiskOpt/wass_risk_opt_pb.html#update_wass_wce_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cvxRiskOpt.wass_risk_opt_pb.update_wass_wce_params" title="Link to this definition">¶</a></dt>
+<dd><p>Update the parameters associated with the WassWCEMaxAffine problem.</p>
+<section id="id12">
+<h3>Arguments:<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>prob: WassWCEMaxAffine:</dt><dd><p>WassWCEMaxAffine problem</p>
+</dd>
+<dt>eps: int:</dt><dd><p>Wasserstein ball radius</p>
+</dd>
+<dt>samples: np.ndarray:</dt><dd><p>Data samples</p>
+</dd>
+</dl>
+</div></blockquote>
+</section>
 </dd></dl>
 
 </section>
@@ -300,6 +500,7 @@ b_k (1 x 1): a scalar or a 1-dimensional cvxpy affine expression</p>
 <li class="toctree-l4"><a class="reference internal" href="#cvxRiskOpt.wass_risk_opt_pb.WassDRCVaR"><code class="docutils literal notranslate"><span class="pre">WassDRCVaR</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#cvxRiskOpt.wass_risk_opt_pb.WassDRExpectation"><code class="docutils literal notranslate"><span class="pre">WassDRExpectation</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#cvxRiskOpt.wass_risk_opt_pb.WassWCEMaxAffine"><code class="docutils literal notranslate"><span class="pre">WassWCEMaxAffine</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cvxRiskOpt.wass_risk_opt_pb.update_wass_wce_params"><code class="docutils literal notranslate"><span class="pre">update_wass_wce_params()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#module-cvxRiskOpt">Module contents</a></li>
@@ -307,9 +508,6 @@ b_k (1 x 1): a scalar or a 1-dimensional cvxpy affine expression</p>
 </li>
 </ul>
 </li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="tutorial/index.html">User Guide</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>

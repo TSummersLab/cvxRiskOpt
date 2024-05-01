@@ -34,16 +34,24 @@ def cp_var_mat_to_list(mat: cp.Variable | cp.Parameter, horizon: int):
     """
     Converts a 1D or 2D cp.Variable/Parameter matrix to a list of cp.Variable/Parameter vectors.
 
-    E.g.
-    (3, 4) matrix where horizon is 4 turns into [(3,), (3,), (3,), (3,)].
-    (3,) of horizon 1 turns into [(3,)]
-    (4,) where 4 is horizon turns into [(), (), (), ()]
+    Some functions, such as lin_mpc_expect_xQx, require lists or arrays of variables/parameters over time as inputs.
+    This function splits a variable/parameter into a list of variables/parameters.
+    e.g.
+        - (3, 4) matrix where the horizon is 4 --> turns into [(3,), (3,), (3,), (3,)].
+        - (3,) of horizon 1 --> turns into [(3,)]
+        - (4,) where 4 is horizon --> turns into [(), (), (), ()]
 
-    :param mat: (m, horizon), (horizon, m), (m,), or (horizon,) cp.Variable
-    :type mat: cp.Variable | cp.Parameter
-    :param horizon: horizon (e.g. MPC horizon).
-    :type horizon: int
-    :return:
+    Arguments:
+    ----------
+        mat: cp.Variable | cp.Parameter:
+            (m, horizon), (horizon, m), (m,), or (horizon,) cp.Variable
+        horizon: int:
+            mat horizon, e.g. MPC horizon (to identify the "horizon" dimension in mat)
+
+    Returns:
+    --------
+        list:
+            List of cp.Variables or cp.Parameters
     """
     # Get the shape of u
     shape = mat.shape
@@ -65,25 +73,51 @@ def cp_var_mat_to_list(mat: cp.Variable | cp.Parameter, horizon: int):
         raise ValueError("Input variable u has an unsupported shape.")
 
 
-def expect_cov_x_t(t, A, B,
+def expect_cov_x_t(t: int, A: int | float | np.ndarray, B: int | float | np.ndarray,
                    x0_mean: cp.Variable | cp.Parameter | cp.Expression,
                    x0_cov: np.ndarray,
                    u: list,
                    w_mean: list, w_cov: list):
     """
-    Computes the expected next state E(x_{t}) and its covariance Cov(x_{t})
-    for a linear system x_{t+1} = Ax_t + Bu_t + w_t.
-    E(x_{t}) = A^{t} x0_mean + sum_{i=0}^{t-1} (A^i B u_{t-1-i} + A^i w_{t-1-i}_mean)
-    Cov(x_{t}) = A^{t} x0_cov A^{t}^T + sum_{i=0}^{t-1} (A^i w_{t-1-i}_cov A^i^T)
-    :param t: current time step for x_t (t >= 1)
-    :param A: dynamics matrix
-    :param B: input matrix
-    :param x0_mean: mean state at t=0
-    :param x0_cov: covariance of state at t=0
-    :param u: list of control decision variables
-    :param w_mean: list of noise mean value
-    :param w_cov: list of noise covariance values
-    :return:
+    Computes the expressions for the expected next state :math:`\\mathbb{E}(x_{t})` and its covariance :math:`\\text{Cov}(x_t)`
+    for a linear system :math:`x_{t+1} = Ax_t + Bu_t + w_t`.
+
+    The expected value and covariance are found by recursively applying the dynamics stating from an initial state :math:`x_0`
+    whose mean :math:`\\overline{x}_0` and covariance :math:`\\Sigma_{x_0}` are known.
+    The mean :math:`\\overline{w}` and covariance :math:`\\Sigma_{w}` of the noise must also be known.
+    The terms are computed as follows:
+
+    .. math ::
+        \\begin{align*}
+        \\mathbb{E}(x_{t}) &= A^{t} \\overline{x}_0 + \\sum_{i=0}^{t-1} (A^i B u_{t-1-i} + A^i \\overline{w}_{t-1-i}) \\\\
+        \\text{Cov}(x_{t}) &= A^{t} \\Sigma_{x_0} {A^{t}}^T + \\sum_{i=0}^{t-1} (A^i \\Sigma_{w_{t-1-i}} {A^i}^T)
+        \\end{align*}
+
+    Arguments:
+    ----------
+        t: int:
+            Current time step for x_t (t >= 1)
+        A: int | float | np.ndarray:
+            Dynamics matrix
+        B: int | float | np.ndarray:
+            Input matrix
+        x0_mean: cp.Variable | cp.Parameter | cp.Expression:
+            Mean state at t=0
+        x0_cov: np.ndarray:
+            Covariance of state at t=0
+        u: list:
+            List of control decision variables
+        w_mean: list:
+            List of noise mean value
+        w_cov: list:
+            List of noise covariance values
+
+    Returns:
+    --------
+        cp.Expression:
+            Expected value expression of the state at time t (xt_mean)
+        cp.Expression:
+            Covariance expression of the state at time t (xt_cov)
     """
     if isinstance(A, (int, float)):
         n = 1
@@ -141,19 +175,6 @@ def expect_cov_x_t(t, A, B,
         AcovA = w_cov[t-1-i] * Ai ** 2 if n == 1 else Ai @ w_cov[t-1-i] @ Ai.T
         xt_cov = xt_cov + AcovA
 
-        # if u[0].shape == ():
-        #     xt_mean = xt_mean + Ai @ B * u[t-1-i]
-        # else:
-        #     xt_mean = xt_mean + Ai @ B @ u[t-1-i]
-        # if w_mean[0].shape == ():
-        #     xt_mean = xt_mean + Ai * w_mean[t-1-i]
-        # else:
-        #     xt_mean = xt_mean + Ai @ w_mean[t-1-i]
-        # if w_cov[0].shape == ():
-        #     xt_cov = xt_cov + w_cov[t-1-i] * Ai @ Ai.T
-        # else:
-        #     xt_cov = xt_cov + Ai @ w_cov[t-1-i] @ Ai.T
-
     return xt_mean, xt_cov
 
 
@@ -166,26 +187,45 @@ def lin_mpc_expect_xQx(t: int, horizon: int,
                        w_mean: list | np.ndarray = None,
                        w_cov: list | np.ndarray = None):
     """
-    Finds the E(x_t^T Q x_t) term.
+    Finds the expression for :math:`\\mathbb{E}(x_t^T Q x_t)`, the weighted quadratic state cost at time :math:`t`.
 
-    Finds the E(x_t^T Q x_t)
+    Finds the expression for :math:`\\mathbb{E}(x_t^T Q x_t)`
     where
-    x_t is a random variable at timestep t in the MPC horizon
+    :math:`x_t` is a random variable (due to the noise) representing the state at timestep :math:`t` in the MPC horizon
     and
     the dynamics are:
-    x_{t+1} = Ax_t + Bu_t + w_t.
+    :math:`x_{t+1} = Ax_t + Bu_t + w_t`.
 
-    :param t: current control time step (starting from 0)
-    :param horizon: MPC horizon length
-    :param A: dynamics matrix
-    :param B: input matrix
-    :param u: list of control decision variables (or cp Variable)
-    :param Q: state cost matrix x^T Q x
-    :param x0_mean: mean state at t=0
-    :param x0_cov: covariance of state at t=0
-    :param w_mean: list of noise mean value (or single noise mean)
-    :param w_cov: list of noise covariance values (or single noise covar)
-    :return:
+    Arguments:
+    ----------
+        t: int:
+            Control time step (starting from 0)
+        horizon: int:
+            MPC horizon length
+        A: int | float | np.ndarray:
+            Dynamics matrix
+        B: int | float | np.ndarray:
+            Input matrix
+        u: list | cp.Variable
+            List of control decision variables (or cp Variable)
+        Q: int | float | np.ndarray:
+            State cost matrix
+        x0_mean: cp.Parameter | cp.Variable | cp.Expression:
+            Mean state at :math:`t=0`
+        x0_cov: np.ndarray, optional:
+            Covariance of state at :math:`t=0`. If not passed, assumed to be zero.
+        w_mean: list | np.ndarray, optional:
+            List of noise mean value (or single noise mean). If not passed, assumed to be zero.
+        w_cov: list | np.ndarray, optional:
+            List of noise covariance values (or single noise covar). If not passed, assumed to be zero.
+
+    Returns:
+    --------
+        cp.Expression:
+            Expression for :math:`\\mathbb{E}(x_t^T Q x_t)`
+        dict:
+            dictionary containing the expressions for the mean and covariance of the state at time :math:`t`
+            ("x_mean", "x_cov")
     """
     # handle optional arguments
     n = x0_mean.shape[0] if x0_mean.ndim > 0 else 1

@@ -68,16 +68,24 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a 1D or 2D cp.Variable/Parameter matrix to a list of cp.Variable/Parameter vectors.</span>
 
-<span class="sd">    E.g.</span>
-<span class="sd">    (3, 4) matrix where horizon is 4 turns into [(3,), (3,), (3,), (3,)].</span>
-<span class="sd">    (3,) of horizon 1 turns into [(3,)]</span>
-<span class="sd">    (4,) where 4 is horizon turns into [(), (), (), ()]</span>
+<span class="sd">    Some functions, such as lin_mpc_expect_xQx, require lists or arrays of variables/parameters over time as inputs.</span>
+<span class="sd">    This function splits a variable/parameter into a list of variables/parameters.</span>
+<span class="sd">    e.g.</span>
+<span class="sd">        - (3, 4) matrix where the horizon is 4 --&gt; turns into [(3,), (3,), (3,), (3,)].</span>
+<span class="sd">        - (3,) of horizon 1 --&gt; turns into [(3,)]</span>
+<span class="sd">        - (4,) where 4 is horizon --&gt; turns into [(), (), (), ()]</span>
 
-<span class="sd">    :param mat: (m, horizon), (horizon, m), (m,), or (horizon,) cp.Variable</span>
-<span class="sd">    :type mat: cp.Variable | cp.Parameter</span>
-<span class="sd">    :param horizon: horizon (e.g. MPC horizon).</span>
-<span class="sd">    :type horizon: int</span>
-<span class="sd">    :return:</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">    ----------</span>
+<span class="sd">        mat: cp.Variable | cp.Parameter:</span>
+<span class="sd">            (m, horizon), (horizon, m), (m,), or (horizon,) cp.Variable</span>
+<span class="sd">        horizon: int:</span>
+<span class="sd">            mat horizon, e.g. MPC horizon (to identify the &quot;horizon&quot; dimension in mat)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    --------</span>
+<span class="sd">        list:</span>
+<span class="sd">            List of cp.Variables or cp.Parameters</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Get the shape of u</span>
     <span class="n">shape</span> <span class="o">=</span> <span class="n">mat</span><span class="o">.</span><span class="n">shape</span>
@@ -102,25 +110,51 @@
 
 <div class="viewcode-block" id="expect_cov_x_t">
 <a class="viewcode-back" href="../../cvxRiskOpt.html#cvxRiskOpt.mpc_helpers.expect_cov_x_t">[docs]</a>
-<span class="k">def</span> <span class="nf">expect_cov_x_t</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">expect_cov_x_t</span><span class="p">(</span><span class="n">t</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">A</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">B</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                    <span class="n">x0_mean</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Parameter</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">,</span>
                    <span class="n">x0_cov</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                    <span class="n">u</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
                    <span class="n">w_mean</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">w_cov</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Computes the expected next state E(x_{t}) and its covariance Cov(x_{t})</span>
-<span class="sd">    for a linear system x_{t+1} = Ax_t + Bu_t + w_t.</span>
-<span class="sd">    E(x_{t}) = A^{t} x0_mean + sum_{i=0}^{t-1} (A^i B u_{t-1-i} + A^i w_{t-1-i}_mean)</span>
-<span class="sd">    Cov(x_{t}) = A^{t} x0_cov A^{t}^T + sum_{i=0}^{t-1} (A^i w_{t-1-i}_cov A^i^T)</span>
-<span class="sd">    :param t: current time step for x_t (t &gt;= 1)</span>
-<span class="sd">    :param A: dynamics matrix</span>
-<span class="sd">    :param B: input matrix</span>
-<span class="sd">    :param x0_mean: mean state at t=0</span>
-<span class="sd">    :param x0_cov: covariance of state at t=0</span>
-<span class="sd">    :param u: list of control decision variables</span>
-<span class="sd">    :param w_mean: list of noise mean value</span>
-<span class="sd">    :param w_cov: list of noise covariance values</span>
-<span class="sd">    :return:</span>
+<span class="sd">    Computes the expressions for the expected next state :math:`\\mathbb{E}(x_{t})` and its covariance :math:`\\text{Cov}(x_t)`</span>
+<span class="sd">    for a linear system :math:`x_{t+1} = Ax_t + Bu_t + w_t`.</span>
+
+<span class="sd">    The expected value and covariance are found by recursively applying the dynamics stating from an initial state :math:`x_0`</span>
+<span class="sd">    whose mean :math:`\\overline{x}_0` and covariance :math:`\\Sigma_{x_0}` are known.</span>
+<span class="sd">    The mean :math:`\\overline{w}` and covariance :math:`\\Sigma_{w}` of the noise must also be known.</span>
+<span class="sd">    The terms are computed as follows:</span>
+
+<span class="sd">    .. math ::</span>
+<span class="sd">        \\begin{align*}</span>
+<span class="sd">        \\mathbb{E}(x_{t}) &amp;= A^{t} \\overline{x}_0 + \\sum_{i=0}^{t-1} (A^i B u_{t-1-i} + A^i \\overline{w}_{t-1-i}) \\\\</span>
+<span class="sd">        \\text{Cov}(x_{t}) &amp;= A^{t} \\Sigma_{x_0} {A^{t}}^T + \\sum_{i=0}^{t-1} (A^i \\Sigma_{w_{t-1-i}} {A^i}^T)</span>
+<span class="sd">        \\end{align*}</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">    ----------</span>
+<span class="sd">        t: int:</span>
+<span class="sd">            Current time step for x_t (t &gt;= 1)</span>
+<span class="sd">        A: int | float | np.ndarray:</span>
+<span class="sd">            Dynamics matrix</span>
+<span class="sd">        B: int | float | np.ndarray:</span>
+<span class="sd">            Input matrix</span>
+<span class="sd">        x0_mean: cp.Variable | cp.Parameter | cp.Expression:</span>
+<span class="sd">            Mean state at t=0</span>
+<span class="sd">        x0_cov: np.ndarray:</span>
+<span class="sd">            Covariance of state at t=0</span>
+<span class="sd">        u: list:</span>
+<span class="sd">            List of control decision variables</span>
+<span class="sd">        w_mean: list:</span>
+<span class="sd">            List of noise mean value</span>
+<span class="sd">        w_cov: list:</span>
+<span class="sd">            List of noise covariance values</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    --------</span>
+<span class="sd">        cp.Expression:</span>
+<span class="sd">            Expected value expression of the state at time t (xt_mean)</span>
+<span class="sd">        cp.Expression:</span>
+<span class="sd">            Covariance expression of the state at time t (xt_cov)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
         <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
@@ -178,19 +212,6 @@
         <span class="n">AcovA</span> <span class="o">=</span> <span class="n">w_cov</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">Ai</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">Ai</span> <span class="o">@</span> <span class="n">w_cov</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="n">i</span><span class="p">]</span> <span class="o">@</span> <span class="n">Ai</span><span class="o">.</span><span class="n">T</span>
         <span class="n">xt_cov</span> <span class="o">=</span> <span class="n">xt_cov</span> <span class="o">+</span> <span class="n">AcovA</span>
 
-        <span class="c1"># if u[0].shape == ():</span>
-        <span class="c1">#     xt_mean = xt_mean + Ai @ B * u[t-1-i]</span>
-        <span class="c1"># else:</span>
-        <span class="c1">#     xt_mean = xt_mean + Ai @ B @ u[t-1-i]</span>
-        <span class="c1"># if w_mean[0].shape == ():</span>
-        <span class="c1">#     xt_mean = xt_mean + Ai * w_mean[t-1-i]</span>
-        <span class="c1"># else:</span>
-        <span class="c1">#     xt_mean = xt_mean + Ai @ w_mean[t-1-i]</span>
-        <span class="c1"># if w_cov[0].shape == ():</span>
-        <span class="c1">#     xt_cov = xt_cov + w_cov[t-1-i] * Ai @ Ai.T</span>
-        <span class="c1"># else:</span>
-        <span class="c1">#     xt_cov = xt_cov + Ai @ w_cov[t-1-i] @ Ai.T</span>
-
     <span class="k">return</span> <span class="n">xt_mean</span><span class="p">,</span> <span class="n">xt_cov</span></div>
 
 
@@ -206,26 +227,45 @@
                        <span class="n">w_mean</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                        <span class="n">w_cov</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Finds the E(x_t^T Q x_t) term.</span>
+<span class="sd">    Finds the expression for :math:`\\mathbb{E}(x_t^T Q x_t)`, the weighted quadratic state cost at time :math:`t`.</span>
 
-<span class="sd">    Finds the E(x_t^T Q x_t)</span>
+<span class="sd">    Finds the expression for :math:`\\mathbb{E}(x_t^T Q x_t)`</span>
 <span class="sd">    where</span>
-<span class="sd">    x_t is a random variable at timestep t in the MPC horizon</span>
+<span class="sd">    :math:`x_t` is a random variable (due to the noise) representing the state at timestep :math:`t` in the MPC horizon</span>
 <span class="sd">    and</span>
 <span class="sd">    the dynamics are:</span>
-<span class="sd">    x_{t+1} = Ax_t + Bu_t + w_t.</span>
+<span class="sd">    :math:`x_{t+1} = Ax_t + Bu_t + w_t`.</span>
 
-<span class="sd">    :param t: current control time step (starting from 0)</span>
-<span class="sd">    :param horizon: MPC horizon length</span>
-<span class="sd">    :param A: dynamics matrix</span>
-<span class="sd">    :param B: input matrix</span>
-<span class="sd">    :param u: list of control decision variables (or cp Variable)</span>
-<span class="sd">    :param Q: state cost matrix x^T Q x</span>
-<span class="sd">    :param x0_mean: mean state at t=0</span>
-<span class="sd">    :param x0_cov: covariance of state at t=0</span>
-<span class="sd">    :param w_mean: list of noise mean value (or single noise mean)</span>
-<span class="sd">    :param w_cov: list of noise covariance values (or single noise covar)</span>
-<span class="sd">    :return:</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">    ----------</span>
+<span class="sd">        t: int:</span>
+<span class="sd">            Control time step (starting from 0)</span>
+<span class="sd">        horizon: int:</span>
+<span class="sd">            MPC horizon length</span>
+<span class="sd">        A: int | float | np.ndarray:</span>
+<span class="sd">            Dynamics matrix</span>
+<span class="sd">        B: int | float | np.ndarray:</span>
+<span class="sd">            Input matrix</span>
+<span class="sd">        u: list | cp.Variable</span>
+<span class="sd">            List of control decision variables (or cp Variable)</span>
+<span class="sd">        Q: int | float | np.ndarray:</span>
+<span class="sd">            State cost matrix</span>
+<span class="sd">        x0_mean: cp.Parameter | cp.Variable | cp.Expression:</span>
+<span class="sd">            Mean state at :math:`t=0`</span>
+<span class="sd">        x0_cov: np.ndarray, optional:</span>
+<span class="sd">            Covariance of state at :math:`t=0`. If not passed, assumed to be zero.</span>
+<span class="sd">        w_mean: list | np.ndarray, optional:</span>
+<span class="sd">            List of noise mean value (or single noise mean). If not passed, assumed to be zero.</span>
+<span class="sd">        w_cov: list | np.ndarray, optional:</span>
+<span class="sd">            List of noise covariance values (or single noise covar). If not passed, assumed to be zero.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    --------</span>
+<span class="sd">        cp.Expression:</span>
+<span class="sd">            Expression for :math:`\\mathbb{E}(x_t^T Q x_t)`</span>
+<span class="sd">        dict:</span>
+<span class="sd">            dictionary containing the expressions for the mean and covariance of the state at time :math:`t`</span>
+<span class="sd">            (&quot;x_mean&quot;, &quot;x_cov&quot;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># handle optional arguments</span>
     <span class="n">n</span> <span class="o">=</span> <span class="n">x0_mean</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">x0_mean</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span>
@@ -269,20 +309,17 @@
 
 
 <h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install/index.html">Install</a></li>
+</ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">cvxRiskOpt</a></li>
 </ul>
-
-<div class="relations">
-<h3>Related Topics</h3>
 <ul>
-  <li><a href="../../index.html">Documentation overview</a><ul>
-  <li><a href="../index.html">Module code</a><ul>
-  </ul></li>
-  </ul></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
 </ul>
-</div>
+
+
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
@@ -293,14 +330,6 @@
     </div>
 </div>
 <script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
-
-
         </div>
       </div>
       <div class="clearer"></div>

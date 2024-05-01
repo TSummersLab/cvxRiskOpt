@@ -35,48 +35,55 @@ import numpy as np
 from numbers import Number
 from cvxpy.problems.problem import Problem as CVXPYProb
 from cvxpy.utilities.deterministic import unique_list
-from typing import Dict, List, Optional, Union
+from typing import Union
 
 
 class WassWCEMaxAffine(CVXPYProb):
     """
-    Wasserstein Worst Case Expectation with Max of Affine terms.
+    Wasserstein Worst Case Expectation Problem with Max of Affine Terms.
 
     This class implements a generic solution for Cor 5.1 (i), eq (15a) with affine loss functions:
-    l = max_k {a_k @ xi + b_k}
+
+    .. math::
+
+        \\ell = \\max_k \\{ \\langle a_k,  \\xi \\rangle + b_k \\}
+
     where
-    xi (m x 1): the random variable for which we have samples
-    a_k (m x 1): a vector that is either a constant vector or a scalar times a decision variable (cvxpy affine expression)
-    b_k (1 x 1): a scalar or a 1-dimensional cvxpy affine expression
+        - xi (m x 1): the random variable for which we have samples
+        - a_k (m x 1): a vector that is either a constant vector or a scalar times a decision variable (cvxpy affine expression)
+        - b_k (1 x 1): a scalar or a 1-dimensional cvxpy affine expression
+        - :math:`\\langle \\cdot, \\cdot \\rangle` is the inner product
 
     .. note::
         Currently, this is only implemented for the 1-, 2-, and inf-norm cases.
 
-    :param num_samples: The number of samples.
-    :type num_samples: int
-    :param a_k_list: A list of vectors that are either constant vectors or scalars times a decision variable.
-    :type a_k_list: list of array_like or cvxpy.AffineExpression
-    :param b_k_list: A list of scalars or 1-dimensional cvxpy affine expressions.
-    :type b_k_list: list of float or cvxpy.AffineExpression, optional
-    :param support_C: The support matrix C.
-    :type support_C: array_like, optional
-    :param support_d: The support vector d.
-    :type support_d: array_like, optional
-    :param used_norm: The norm to be used. Default is 2.
-    :type used_norm: int, optional
-    :param vp_suffix: The suffix for the variable prefix.
-    :type vp_suffix: str, optional
+    Arguments:
+    ----------
+        num_samples: int:
+            The number of samples.
+        a_k_list: Number | array_like
+            A list of vectors that are either constant vectors or scalars times a decision variable.
+        b_k_list: array_like
+            A list of scalars or 1-dimensional cvxpy affine expressions.
+        support_C: np.ndarray, optional
+            The support matrix C. If None passed, the support is considered to be the real space.
+        support_d: np.ndarray, optional
+            The support vector d. If None passed, the support is considered to be the real space.
+        used_norm: int | np.inf, optional
+            The norm to be used. Either 1, 2, or infinity (np.inf). Default is 2.
+        vp_suffix: str, optional
+            The suffix for the variable/parameter names.
     """
     instance_counter = 0
 
-    def __init__(self, num_samples,
-                 a_k_list, b_k_list=None,
+    def __init__(self, num_samples: int,
+                 a_k_list: list, b_k_list: list = None,
                  support_C=None, support_d=None, used_norm=2,
-                 vp_suffix=None):
+                 vp_suffix: str = None) -> None:
         # choose the cp variable and parameter suffix
         WassWCEMaxAffine.instance_counter += 1
         if vp_suffix is None:
-            vp_suffix = "_WWCEMA" + str(WassWCEMaxAffine.instance_counter)
+            vp_suffix = "_wwcema" + str(WassWCEMaxAffine.instance_counter)
 
         # number of samples
         self._num_samples = num_samples
@@ -197,18 +204,67 @@ class WassWCEMaxAffine(CVXPYProb):
     # TODO: consider implementing some operators.
 
 
+def update_wass_wce_params(prob, eps, samples) -> None:
+    """
+    Update the parameters associated with the WassWCEMaxAffine problem.
+
+    Arguments:
+    ----------
+        prob: WassWCEMaxAffine:
+            WassWCEMaxAffine problem
+        eps: int:
+            Wasserstein ball radius
+        samples: np.ndarray:
+            Data samples
+    """
+    for par in prob.param_dict.keys():
+        if 'eps' in par:
+            prob.param_dict[par].value = eps
+        if 'samples' in par:
+            prob.param_dict[par].value = samples
+    return
+
+
 class WassDRExpectation(WassWCEMaxAffine):
     """
-    Provides a high-level implementation of the DR Expectation function.
-    sup_{P in \mathcal{P}} E^P[a * xi + b]
-    where a, b may contain decision variables
+    Provides a high-level implementation of the DR Expectation with a Wasserstein-based ambiguity set.
+
+    Implements
+
+    .. math::
+
+        \\sup_{\\mathbb{P} \\in \\mathcal{P}} \\quad \\mathbb{E}^\\mathbb{P} \\left[ \\langle a, \\xi \\rangle + b \\right]
+
+    where :math:`a, b` may contain decision variables and :math:`\\langle \\cdot, \\cdot \\rangle` is the inner product.
+
+
+    Arguments:
+    ----------
+        num_samples: int:
+            The number of samples.
+        a: int | float | cp.Variable | cp.Parameter | cp.Expression:
+            The "a" term in :math:`\\langle a, xi \\rangle + b`.
+        b: int | float | cp.Variable | cp.Parameter | cp.Expression, optional"
+            The "b" term in :math:`\\langle a, xi \\rangle + b`. If not assigned, 0 is used.
+        support_C: np.ndarray, optional
+            The support matrix C. If None passed, the support is considered to be the real space.
+        support_d: np.ndarray, optional
+            The support vector d. If None passed, the support is considered to be the real space.
+        used_norm: int | np.inf, optional
+            The norm to be used. Either 1, 2, or infinity (np.inf). Default is 2.
+        vp_suffix: str, optional
+            The suffix for the variable/parameter names.
     """
     instance_counter = 0
 
-    def __init__(self, num_samples, a, b=0, support_C=None, support_d=None, used_norm=2, vp_suffix=None):
+    def __init__(self,
+                 num_samples: int,
+                 a: int | float | cp.Variable | cp.Parameter | cp.Expression,
+                 b: int | float | cp.Variable | cp.Parameter | cp.Expression = 0,
+                 support_C=None, support_d=None, used_norm=2, vp_suffix=None):
         WassDRExpectation.instance_counter += 1
         if vp_suffix is None:
-            vp_suffix = "_WDRE" + str(WassDRExpectation.instance_counter)
+            vp_suffix = "_wdre" + str(WassDRExpectation.instance_counter)
         if b == 0:
             b = []
         a = [a]
@@ -306,30 +362,76 @@ class WassDRExpectation(WassWCEMaxAffine):
 
 class WassDRCVaR(WassWCEMaxAffine):
     """
-    Provides a high-level implementation of the DR-CVaR function.
+    Provides a high-level implementation of the DR-CVaR with a Wasserstein-based ambiguity set.
 
-    sup_{P in \mathcal{P}} CVaR^P[a * xi + b]
-    where a, b may contain decision variables
+    Implements
+
+    .. math ::
+
+        \\sup_{\\mathbb{P} \\in \\mathcal{P}} \\quad  \\text{CVaR}_{\\alpha}^\\mathbb{P}\\left[ \\langle a, \\xi \\rangle + b \\right]
+
+    where :math:`a, b` may contain decision variables and :math:`\\langle \\cdot, \\cdot \\rangle` is the inner product.
+    :math:`\\alpha` is the CVaR level (average in alpha * 100% of the worst/highest cases)
+
+    Alternatively, this can also implement the CVaR reformulated form as a max of two affine terms:
+
+     .. math ::
+
+        \\sup_{\\mathbb{P} \\in \\mathcal{P}} \\quad  \\mathbb{E}^{\\mathbb{P}} \\max_{k \\in \\{1, 2\\}} \\left[ \\langle a_k, \\xi \\rangle + b_k \\right].
+
+
+    .. Note ::
+
+        Either "a" and "b" must be passed or "a_k_list" and "b_k_list", but not both nor neither.
+
+
+    Arguments:
+    ----------
+        num_samples: int:
+            The number of samples.
+        xi_length: int:
+            Size of a sample. If :math:`\\xi` is m x 1 --> xi_length = m
+        a: int | float | cp.Variable | cp.Parameter | cp.Expression, optional:
+            The "a" term in :math:`\\langle a, xi \\rangle + b`.
+            If this is passed, the "b" term is expected.
+            This should not be passed if "a_k_list" and "b_k_list" are passed.
+        b: int | float | cp.Variable | cp.Parameter | cp.Expression, optional, optional:
+            The "b" term in :math:`\\langle a, xi \\rangle + b`. If not assigned, 0 is used.
+            This should not be passed if "a_k_list" and "b_k_list" are passed.
+        a_k_list: Number | array_like, optional:
+            A list of vectors that are either constant vectors or scalars times a decision variable.
+            If this is passed, the "b_k_list" term is expected.
+            This should not be passed if "a" and "b" are passed.
+        b_k_list: array_like, optional:
+            A list of scalars or 1-dimensional cvxpy affine expressions.
+            This should not be passed if "a" and "b" are passed.
+        alpha: float, optional:
+            CVaR level (average in alpha * 100% of the worst/highest cases)
+        support_C: np.ndarray, optional
+            The support matrix C. If None passed, the support is considered to be the real space.
+        support_d: np.ndarray, optional
+            The support vector d. If None passed, the support is considered to be the real space.
+        used_norm: int | np.inf, optional
+            The norm to be used. Either 1, 2, or infinity (np.inf). Default is 2.
+        vp_suffix: str, optional
+            The suffix for the variable/parameter names.
+
     """
     instance_counter = 0
 
-    def __init__(self, num_samples, xi_length, a=None, b=0, a_k_list=None, b_k_list=None, alpha=0.1, support_C=None,
-                 support_d=None, used_norm=2, vp_suffix=None):
-        """
-        :param num_samples:
-        :param a: a term in a * xi + b
-        :param b: b term in a * xi + b
-        :param a_k_list: a_k_list used in WassWCEMaxAffine
-        :param b_k_list: b_k_list used in WassWCEMaxAffine
-        :param alpha: CVaR level (average in alpha * 100% of the worst/highest cases)
-        :param xi_length: size of a sample. If xi is m x 1 --> xi_length = m
-        :param support_C: C term in support of random variable {xi | C*xi <= d}
-        :param support_d: d term in support of random variable {xi | C*xi <= d}
-        :param used_norm: norm being used
-        """
+    def __init__(self,
+                 num_samples: int, xi_length: int,
+                 a: int | float | cp.Variable | cp.Parameter | cp.Expression = None,
+                 b: int | float | cp.Variable | cp.Parameter | cp.Expression = 0,
+                 a_k_list=None,
+                 b_k_list=None,
+                 alpha=0.1,
+                 support_C=None, support_d=None,
+                 used_norm=2, vp_suffix=None):
+
         WassDRCVaR.instance_counter += 1
         if vp_suffix is None:
-            vp_suffix = "_WDRCVAR" + str(WassDRCVaR.instance_counter)
+            vp_suffix = "_wdrcvar" + str(WassDRCVaR.instance_counter)
 
         self._alpha = alpha
 

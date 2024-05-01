@@ -106,11 +106,13 @@ def esfahani_portfolio_codegen(num_samples=10, num_sim=1, gen_code=True, keep_in
     #     x_test_codegen.append(test_result_cpg)
     for sim in range(num_sim):
         xi = xi_dataset[:, :, sim+additional_run]
-        for par in test_prob.param_dict.keys():
-            if 'eps' in par:
-                test_prob.param_dict[par].value = eps
-            if 'samples' in par:
-                test_prob.param_dict[par].value = xi
+        # for par in test_prob.param_dict.keys():
+        #     if 'eps' in par:
+        #         test_prob.param_dict[par].value = eps
+        #     if 'samples' in par:
+        #         test_prob.param_dict[par].value = xi
+        from cvxRiskOpt.wass_risk_opt_pb import update_wass_wce_params
+        update_wass_wce_params(test_prob, eps, xi)
         ts = time.time()
         if solver == cp.ECOS:
             test_prob.solve(method='cpg', updated_params=update_params)

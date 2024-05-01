@@ -360,9 +360,14 @@ def _det_cclp(kappa_e: int | float,
     return kappa_e * sigma_x + psi_hat <= 0
 
 
-def cclp_gauss(eps, a=None, b=None,
-               xi1_hat=None, xi2_hat=None,
-               gam11=None, gam12=None, gam22=None,
+def cclp_gauss(eps: int | float,
+               a: int | float | list | np.ndarray | cp.Variable | cp.Expression = None,
+               b: int | float | cp.Variable | cp.Expression = None,
+               xi1_hat: int | float | list | np.ndarray | cp.Variable | cp.Expression = None,
+               xi2_hat: int | float = None,
+               gam11: int | float | list | np.ndarray = None,
+               gam12: int | float | list | np.ndarray = None,
+               gam22: int | float = None,
                assume_sym=False, assume_psd=False):
     """
     Reformulates a CC of the type
@@ -378,28 +383,33 @@ def cclp_gauss(eps, a=None, b=None,
         \\text{Cov}(\\xi) &= \\begin{bmatrix} \\text{gam11} & \\text{gam12} \\\\ \\text{gam12}^T & \\text{gam22} \\end{bmatrix}
         \\end{align*}
 
-    :param eps: The epsilon value in the chance constraint.
-    :type eps: float
-    :param a: The coefficient vector a in the chance constraint.
-    :type a: array_like, optional
-    :param b: The constant term b in the chance constraint.
-    :type b: float, optional
-    :param xi1_hat: The expected value of xi1.
-    :type xi1_hat: array_like, optional
-    :param xi2_hat: The expected value of xi2.
-    :type xi2_hat: array_like, optional
-    :param gam11: The covariance matrix of xi1.
-    :type gam11: array_like, optional
-    :param gam12: The cross-covariance matrix between xi1 and xi2.
-    :type gam12: array_like, optional
-    :param gam22: The covariance matrix of xi2.
-    :type gam22: array_like, optional
-    :param assume_sym: Whether to assume the covariance matrix is symmetric.
-    :type assume_sym: bool, optional
-    :param assume_psd: Whether to assume the covariance matrix is positive semi-definite.
-    :type assume_psd: bool, optional
-    :return: The reformulated chance constraint.
-    :rtype: cvxpy.Constraint or cp.Expression
+    Arguments:
+    ----------
+        eps : int | float:
+            The epsilon risk bound in the chance constraint.
+        a : int | float | list | np.ndarray | cp.Variable | cp.Expression, optional:
+            The coefficient vector/scalar "a" in the chance constraint.
+        b : int | float | cp.Variable | cp.Expression, optional:
+            The scalar term "b" in the chance constraint.
+        xi1_hat : int | float | list | np.ndarray | cp.Variable | cp.Expression, optional:
+            The expected value of xi1.
+        xi2_hat : int | float, optional:
+            The expected value of xi2.
+        gam11 : int | float | list | np.ndarray, optional:
+            The covariance matrix of xi1.
+        gam12 : int | float | list | np.ndarray, optional:
+            The cross-covariance matrix between xi1 and xi2.
+        gam22 : int | float, optional:
+            The covariance matrix of xi2.
+        assume_sym : bool, optional:
+            Whether to assume the covariance matrix is symmetric (otherwise, it is checked).
+        assume_psd : bool, optional:
+            Whether to assume the covariance matrix is positive semi-definite (otherwise, it is checked).
+
+    Returns:
+    --------
+        cvxpy.Constraint or cp.Expression:
+            The reformulated deterministic chance constraint.
     """
     # check inputs
     inputs = _format_inputs(eps, a, b,
@@ -413,9 +423,14 @@ def cclp_gauss(eps, a=None, b=None,
     return constr
 
 
-def cclp_dro_mean_cov(eps, a=None, b=None,
-                      xi1_hat=None, xi2_hat=None,
-                      gam11=None, gam12=None, gam22=None,
+def cclp_dro_mean_cov(eps: int | float,
+                      a: int | float | list | np.ndarray | cp.Variable | cp.Expression = None,
+                      b: int | float | cp.Variable | cp.Expression = None,
+                      xi1_hat: int | float | list | np.ndarray | cp.Variable | cp.Expression = None,
+                      xi2_hat: int | float = None,
+                      gam11: int | float | list | np.ndarray = None,
+                      gam12: int | float | list | np.ndarray = None,
+                      gam22: int | float = None,
                       assume_sym=False, assume_psd=False,
                       centrally_symmetric=False):
     """
@@ -433,30 +448,37 @@ def cclp_dro_mean_cov(eps, a=None, b=None,
         \\text{Cov}(\\xi) &= \\begin{bmatrix} \\text{gam11} & \\text{gam12} \\\\ \\text{gam12}^T & \\text{gam22} \\end{bmatrix}
         \\end{align*}
 
-    :param eps: The epsilon value in the chance constraint.
-    :type eps: float
-    :param a: The coefficient vector a in the chance constraint.
-    :type a: array_like, optional
-    :param b: The constant term b in the chance constraint.
-    :type b: float, optional
-    :param xi1_hat: The expected value of xi1.
-    :type xi1_hat: array_like, optional
-    :param xi2_hat: The expected value of xi2.
-    :type xi2_hat: array_like, optional
-    :param gam11: The covariance matrix of xi1.
-    :type gam11: array_like, optional
-    :param gam12: The cross-covariance matrix between xi1 and xi2.
-    :type gam12: array_like, optional
-    :param gam22: The covariance matrix of xi2.
-    :type gam22: array_like, optional
-    :param assume_sym: Whether to assume the covariance matrix is symmetric.
-    :type assume_sym: bool, optional
-    :param assume_psd: Whether to assume the covariance matrix is positive semi-definite.
-    :type assume_psd: bool, optional
-    :param centrally_symmetric: Flag if distribution is centrally symmetric (Def 3.1).
-    :type centrally_symmetric: bool, optional
-    :return: The reformulated chance constraint.
-    :rtype: cvxpy.Constraint or cvxpy.Expression
+    Arguments:
+    ----------
+        eps : int | float:
+            The epsilon risk bound in the chance constraint.
+        a : int | float | list | np.ndarray | cp.Variable | cp.Expression, optional:
+            The coefficient vector/scalar "a" in the chance constraint.
+        b : int | float | cp.Variable | cp.Expression, optional:
+            The scalar term "b" in the chance constraint.
+        xi1_hat : int | float | list | np.ndarray | cp.Variable | cp.Expression, optional:
+            The expected value of xi1.
+        xi2_hat : int | float, optional:
+            The expected value of xi2.
+        gam11 : int | float | list | np.ndarray, optional:
+            The covariance matrix of xi1.
+        gam12 : int | float | list | np.ndarray, optional:
+            The cross-covariance matrix between xi1 and xi2.
+        gam22 : int | float, optional:
+            The covariance matrix of xi2.
+        assume_sym : bool, optional:
+            Whether to assume the covariance matrix is symmetric (otherwise, it is checked).
+        assume_psd : bool, optional:
+            Whether to assume the covariance matrix is positive semi-definite (otherwise, it is checked).
+        centrally_symmetric: bool, optional:
+            Flag if distribution is centrally symmetric
+            (Def 3.1 in "On Distributionally Robust Chance-Constrained Linear Programs").
+
+    Returns:
+    --------
+        cvxpy.Constraint or cp.Expression:
+            The reformulated deterministic chance constraint.
+
     """
     # check inputs
     inputs = _format_inputs(eps, a, b,

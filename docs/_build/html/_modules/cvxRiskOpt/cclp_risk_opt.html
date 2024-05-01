@@ -394,9 +394,14 @@
 
 <div class="viewcode-block" id="cclp_gauss">
 <a class="viewcode-back" href="../../cvxRiskOpt.html#cvxRiskOpt.cclp_risk_opt.cclp_gauss">[docs]</a>
-<span class="k">def</span> <span class="nf">cclp_gauss</span><span class="p">(</span><span class="n">eps</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">xi1_hat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xi2_hat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">gam11</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gam12</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gam22</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">cclp_gauss</span><span class="p">(</span><span class="n">eps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">,</span>
+               <span class="n">a</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="n">b</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="n">xi1_hat</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="n">xi2_hat</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="n">gam11</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="n">gam12</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="n">gam22</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                <span class="n">assume_sym</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">assume_psd</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reformulates a CC of the type</span>
@@ -412,28 +417,33 @@
 <span class="sd">        \\text{Cov}(\\xi) &amp;= \\begin{bmatrix} \\text{gam11} &amp; \\text{gam12} \\\\ \\text{gam12}^T &amp; \\text{gam22} \\end{bmatrix}</span>
 <span class="sd">        \\end{align*}</span>
 
-<span class="sd">    :param eps: The epsilon value in the chance constraint.</span>
-<span class="sd">    :type eps: float</span>
-<span class="sd">    :param a: The coefficient vector a in the chance constraint.</span>
-<span class="sd">    :type a: array_like, optional</span>
-<span class="sd">    :param b: The constant term b in the chance constraint.</span>
-<span class="sd">    :type b: float, optional</span>
-<span class="sd">    :param xi1_hat: The expected value of xi1.</span>
-<span class="sd">    :type xi1_hat: array_like, optional</span>
-<span class="sd">    :param xi2_hat: The expected value of xi2.</span>
-<span class="sd">    :type xi2_hat: array_like, optional</span>
-<span class="sd">    :param gam11: The covariance matrix of xi1.</span>
-<span class="sd">    :type gam11: array_like, optional</span>
-<span class="sd">    :param gam12: The cross-covariance matrix between xi1 and xi2.</span>
-<span class="sd">    :type gam12: array_like, optional</span>
-<span class="sd">    :param gam22: The covariance matrix of xi2.</span>
-<span class="sd">    :type gam22: array_like, optional</span>
-<span class="sd">    :param assume_sym: Whether to assume the covariance matrix is symmetric.</span>
-<span class="sd">    :type assume_sym: bool, optional</span>
-<span class="sd">    :param assume_psd: Whether to assume the covariance matrix is positive semi-definite.</span>
-<span class="sd">    :type assume_psd: bool, optional</span>
-<span class="sd">    :return: The reformulated chance constraint.</span>
-<span class="sd">    :rtype: cvxpy.Constraint or cp.Expression</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">    ----------</span>
+<span class="sd">        eps : int | float:</span>
+<span class="sd">            The epsilon risk bound in the chance constraint.</span>
+<span class="sd">        a : int | float | list | np.ndarray | cp.Variable | cp.Expression, optional:</span>
+<span class="sd">            The coefficient vector/scalar &quot;a&quot; in the chance constraint.</span>
+<span class="sd">        b : int | float | cp.Variable | cp.Expression, optional:</span>
+<span class="sd">            The scalar term &quot;b&quot; in the chance constraint.</span>
+<span class="sd">        xi1_hat : int | float | list | np.ndarray | cp.Variable | cp.Expression, optional:</span>
+<span class="sd">            The expected value of xi1.</span>
+<span class="sd">        xi2_hat : int | float, optional:</span>
+<span class="sd">            The expected value of xi2.</span>
+<span class="sd">        gam11 : int | float | list | np.ndarray, optional:</span>
+<span class="sd">            The covariance matrix of xi1.</span>
+<span class="sd">        gam12 : int | float | list | np.ndarray, optional:</span>
+<span class="sd">            The cross-covariance matrix between xi1 and xi2.</span>
+<span class="sd">        gam22 : int | float, optional:</span>
+<span class="sd">            The covariance matrix of xi2.</span>
+<span class="sd">        assume_sym : bool, optional:</span>
+<span class="sd">            Whether to assume the covariance matrix is symmetric (otherwise, it is checked).</span>
+<span class="sd">        assume_psd : bool, optional:</span>
+<span class="sd">            Whether to assume the covariance matrix is positive semi-definite (otherwise, it is checked).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    --------</span>
+<span class="sd">        cvxpy.Constraint or cp.Expression:</span>
+<span class="sd">            The reformulated deterministic chance constraint.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># check inputs</span>
     <span class="n">inputs</span> <span class="o">=</span> <span class="n">_format_inputs</span><span class="p">(</span><span class="n">eps</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span>
@@ -450,9 +460,14 @@
 
 <div class="viewcode-block" id="cclp_dro_mean_cov">
 <a class="viewcode-back" href="../../cvxRiskOpt.html#cvxRiskOpt.cclp_risk_opt.cclp_dro_mean_cov">[docs]</a>
-<span class="k">def</span> <span class="nf">cclp_dro_mean_cov</span><span class="p">(</span><span class="n">eps</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                      <span class="n">xi1_hat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xi2_hat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                      <span class="n">gam11</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gam12</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gam22</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">cclp_dro_mean_cov</span><span class="p">(</span><span class="n">eps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">,</span>
+                      <span class="n">a</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">b</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">xi1_hat</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">xi2_hat</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">gam11</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">gam12</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">gam22</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="n">assume_sym</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">assume_psd</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                       <span class="n">centrally_symmetric</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -470,30 +485,37 @@
 <span class="sd">        \\text{Cov}(\\xi) &amp;= \\begin{bmatrix} \\text{gam11} &amp; \\text{gam12} \\\\ \\text{gam12}^T &amp; \\text{gam22} \\end{bmatrix}</span>
 <span class="sd">        \\end{align*}</span>
 
-<span class="sd">    :param eps: The epsilon value in the chance constraint.</span>
-<span class="sd">    :type eps: float</span>
-<span class="sd">    :param a: The coefficient vector a in the chance constraint.</span>
-<span class="sd">    :type a: array_like, optional</span>
-<span class="sd">    :param b: The constant term b in the chance constraint.</span>
-<span class="sd">    :type b: float, optional</span>
-<span class="sd">    :param xi1_hat: The expected value of xi1.</span>
-<span class="sd">    :type xi1_hat: array_like, optional</span>
-<span class="sd">    :param xi2_hat: The expected value of xi2.</span>
-<span class="sd">    :type xi2_hat: array_like, optional</span>
-<span class="sd">    :param gam11: The covariance matrix of xi1.</span>
-<span class="sd">    :type gam11: array_like, optional</span>
-<span class="sd">    :param gam12: The cross-covariance matrix between xi1 and xi2.</span>
-<span class="sd">    :type gam12: array_like, optional</span>
-<span class="sd">    :param gam22: The covariance matrix of xi2.</span>
-<span class="sd">    :type gam22: array_like, optional</span>
-<span class="sd">    :param assume_sym: Whether to assume the covariance matrix is symmetric.</span>
-<span class="sd">    :type assume_sym: bool, optional</span>
-<span class="sd">    :param assume_psd: Whether to assume the covariance matrix is positive semi-definite.</span>
-<span class="sd">    :type assume_psd: bool, optional</span>
-<span class="sd">    :param centrally_symmetric: Flag if distribution is centrally symmetric (Def 3.1).</span>
-<span class="sd">    :type centrally_symmetric: bool, optional</span>
-<span class="sd">    :return: The reformulated chance constraint.</span>
-<span class="sd">    :rtype: cvxpy.Constraint or cvxpy.Expression</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">    ----------</span>
+<span class="sd">        eps : int | float:</span>
+<span class="sd">            The epsilon risk bound in the chance constraint.</span>
+<span class="sd">        a : int | float | list | np.ndarray | cp.Variable | cp.Expression, optional:</span>
+<span class="sd">            The coefficient vector/scalar &quot;a&quot; in the chance constraint.</span>
+<span class="sd">        b : int | float | cp.Variable | cp.Expression, optional:</span>
+<span class="sd">            The scalar term &quot;b&quot; in the chance constraint.</span>
+<span class="sd">        xi1_hat : int | float | list | np.ndarray | cp.Variable | cp.Expression, optional:</span>
+<span class="sd">            The expected value of xi1.</span>
+<span class="sd">        xi2_hat : int | float, optional:</span>
+<span class="sd">            The expected value of xi2.</span>
+<span class="sd">        gam11 : int | float | list | np.ndarray, optional:</span>
+<span class="sd">            The covariance matrix of xi1.</span>
+<span class="sd">        gam12 : int | float | list | np.ndarray, optional:</span>
+<span class="sd">            The cross-covariance matrix between xi1 and xi2.</span>
+<span class="sd">        gam22 : int | float, optional:</span>
+<span class="sd">            The covariance matrix of xi2.</span>
+<span class="sd">        assume_sym : bool, optional:</span>
+<span class="sd">            Whether to assume the covariance matrix is symmetric (otherwise, it is checked).</span>
+<span class="sd">        assume_psd : bool, optional:</span>
+<span class="sd">            Whether to assume the covariance matrix is positive semi-definite (otherwise, it is checked).</span>
+<span class="sd">        centrally_symmetric: bool, optional:</span>
+<span class="sd">            Flag if distribution is centrally symmetric</span>
+<span class="sd">            (Def 3.1 in &quot;On Distributionally Robust Chance-Constrained Linear Programs&quot;).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    --------</span>
+<span class="sd">        cvxpy.Constraint or cp.Expression:</span>
+<span class="sd">            The reformulated deterministic chance constraint.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># check inputs</span>
     <span class="n">inputs</span> <span class="o">=</span> <span class="n">_format_inputs</span><span class="p">(</span><span class="n">eps</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span>
@@ -526,20 +548,17 @@
 
 
 <h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install/index.html">Install</a></li>
+</ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">cvxRiskOpt</a></li>
 </ul>
-
-<div class="relations">
-<h3>Related Topics</h3>
 <ul>
-  <li><a href="../../index.html">Documentation overview</a><ul>
-  <li><a href="../index.html">Module code</a><ul>
-  </ul></li>
-  </ul></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
 </ul>
-</div>
+
+
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
@@ -550,14 +569,6 @@
     </div>
 </div>
 <script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
-
-
         </div>
       </div>
       <div class="clearer"></div>
