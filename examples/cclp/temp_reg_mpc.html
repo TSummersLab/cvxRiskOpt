@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Model Predictive Control for Temperature Regulation &#8212; cvxRiskOpt 0.1.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=12dfc556" />
+    <script src="../../_static/documentation_options.js?v=92734c54"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="model-predictive-control-for-temperature-regulation">
+<h1>Model Predictive Control for Temperature Regulation<a class="headerlink" href="#model-predictive-control-for-temperature-regulation" title="Link to this heading">¶</a></h1>
+<p>Consider a simple Model Predictive Control (MPC)-based regulator for temperature control.</p>
+<p>The optimization problem is given by:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align*}
+\min_x \quad &amp; c \cdot x \\
+\text{subject to} \quad &amp; \mathbb{P}(x \geq \mathbf{d}) \geq 1 - \epsilon
+\end{align*}\end{split}\]</div>
+<p>Where <span class="math notranslate nohighlight">\(c\)</span> is the unit cost of the product, <span class="math notranslate nohighlight">\(\mathbb{P}\)</span> measures the probability of an event, and <span class="math notranslate nohighlight">\(\epsilon \in (0, 0.5]\)</span> is the risk bound.</p>
+<p>Assume that <span class="math notranslate nohighlight">\(\mathbf{d}\)</span> follows a Gaussian distribution with mean <span class="math notranslate nohighlight">\(\overline{d}\)</span> and variance <span class="math notranslate nohighlight">\(\sigma^2\)</span>: <span class="math notranslate nohighlight">\(\mathbf{d} \sim \mathcal{N}(\overline{d}, \sigma^2)\)</span>.</p>
+<p>The chance constraint can be reformulated into a deterministic constraint as follows:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align*}
+\mathbb{P}(x \geq \mathbf{d}) \geq 1 - \epsilon &amp; \iff \mathbb{P}(-x + \mathbf{d} \leq 0) \geq 1 - \epsilon \\
+&amp; \iff -x + \overline{d} + \sigma \Phi^{-1}(1-\epsilon) \leq 0 \\
+&amp; \iff x \geq \overline{d} + \sigma \Phi^{-1}(1-\epsilon)
+\end{align*}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\Phi^{-1}\)</span> is the inverse CDF of the standard normal Gaussian distribution.</p>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h2>
+<p>In the following code, we solve the production optimization problem with CVXPY and cvxRiskOpt and with CVXPY only.
+The main difference between using cvxRiskOpt and not doing so is in the inclusion of the chance constraint.</p>
+<p>With cvxRiskOpt we only need to rearrange the chance constraint:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align*}
+&amp; \mathbb{P}(-x + \mathbf{d} \leq 0) \geq 1 - \epsilon \iff \mathbb{P}(a \mathbf{\xi_1} + b + \mathbf{\xi_2} \leq 0) \geq 1 - \epsilon\\
+\rightarrow &amp; a = 1, \ \mathbf{\xi_1} = \mathbf{d}, \ b=-x, \ \mathbf{\xi_2} = 0
+\end{align*}\end{split}\]</div>
+<p>However, using CVXPY only, we need to reformulate it into the deterministic constraint as show earlier.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cvxpy</span> <span class="k">as</span> <span class="nn">cp</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="n">c</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># cost</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>  <span class="c1"># decision variable</span>
+<span class="n">d_mean</span> <span class="o">=</span> <span class="mi">700</span>  <span class="c1"># demain mean</span>
+<span class="n">d_var</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># demand variance</span>
+<span class="n">eps</span> <span class="o">=</span> <span class="mf">0.1</span>  <span class="c1"># risk bound</span>
+
+<span class="c1"># cvxpy problems</span>
+<span class="n">objective</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Minimize</span><span class="p">(</span><span class="n">c</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
+
+<span class="c1"># cvxpy + cvxRiskOpt</span>
+<span class="kn">from</span> <span class="nn">cvxRiskOpt.cclp_risk_opt</span> <span class="kn">import</span> <span class="n">cclp_gauss</span>
+<span class="n">cc_contr</span> <span class="o">=</span> <span class="n">cclp_gauss</span><span class="p">(</span><span class="n">eps</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="o">=-</span><span class="n">x</span><span class="p">,</span>
+                      <span class="n">xi1_hat</span><span class="o">=</span><span class="n">d_mean</span><span class="p">,</span>
+                      <span class="n">gam11</span><span class="o">=</span><span class="n">d_var</span><span class="p">)</span>
+<span class="n">constraints_with_cro</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">cc_contr</span><span class="p">]</span>
+<span class="n">prob_with_cro</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">constraints_with_cro</span><span class="p">)</span>
+<span class="n">prob_with_cro</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">CLARABEL</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Production amount (CVXPY + cvxRiskOpt): &quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+<span class="c1"># cvxpy only</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span>
+<span class="n">d_std_div</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d_var</span><span class="p">)</span>
+<span class="n">constraints</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">d_mean</span> <span class="o">+</span> <span class="n">d_std_div</span> <span class="o">*</span> <span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">eps</span><span class="p">)]</span>
+<span class="n">prob</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">constraints</span><span class="p">)</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">CLARABEL</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Production amount (CVXPY only): &quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Production</span> <span class="n">amount</span> <span class="p">(</span><span class="n">CVXPY</span> <span class="o">+</span> <span class="n">cvxRiskOpt</span><span class="p">):</span>  <span class="mf">707.0193468163586</span>
+<span class="n">Production</span> <span class="n">amount</span> <span class="p">(</span><span class="n">CVXPY</span> <span class="n">only</span><span class="p">):</span>  <span class="mf">707.0193468163586</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">cvxRiskOpt</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install/index.html">Install</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">cvxRiskOpt</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/index.html">User Guide</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Examples</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Sleiman Safaoui, Tyler Summers.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../../_sources/examples/cclp/temp_reg_mpc.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>cvxRiskOpt.wass_risk_opt_pb &#8212; cvxRiskOpt 0.1.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=12dfc556" />
+    <script src="../../_static/documentation_options.js?v=92734c54"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for cvxRiskOpt.wass_risk_opt_pb</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">cvxRiskOpt: Risk-Based Optimization tool using CVXPY and CVXPYgen</span>
+<span class="sd">Copyright (C) 2024  Sleiman Safaoui</span>
+
+<span class="sd">This program is free software: you can redistribute it and/or modify</span>
+<span class="sd">it under the terms of the GNU General Public License as published by</span>
+<span class="sd">the Free Software Foundation, either version 3 of the License, or</span>
+<span class="sd">(at your option) any later version.</span>
+
+<span class="sd">This program is distributed in the hope that it will be useful,</span>
+<span class="sd">but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="sd">MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="sd">GNU General Public License for more details.</span>
+
+<span class="sd">You should have received a copy of the GNU General Public License</span>
+<span class="sd">along with this program.  If not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="sd">GitHub:</span>
+<span class="sd">@The-SS</span>
+<span class="sd">Email:</span>
+<span class="sd">snsafaoui@gmail.com</span>
+<span class="sd">sleiman.safaoui@utdallas.edu</span>
+
+
+
+<span class="sd">CVXPY-based data-driven optimization problems that compute risk metrics.</span>
+
+<span class="sd">We implement some results from:</span>
+<span class="sd">&quot;Data-driven distributionally robust optimization using the Wasserstein metric: </span>
+<span class="sd">    Performance guarantees and tractable reformulations&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">cvxpy</span> <span class="k">as</span> <span class="nn">cp</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Number</span>
+<span class="kn">from</span> <span class="nn">cvxpy.problems.problem</span> <span class="kn">import</span> <span class="n">Problem</span> <span class="k">as</span> <span class="n">CVXPYProb</span>
+<span class="kn">from</span> <span class="nn">cvxpy.utilities.deterministic</span> <span class="kn">import</span> <span class="n">unique_list</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+
+
+<div class="viewcode-block" id="WassWCEMaxAffine">
+<a class="viewcode-back" href="../../cvxRiskOpt.html#cvxRiskOpt.wass_risk_opt_pb.WassWCEMaxAffine">[docs]</a>
+<span class="k">class</span> <span class="nc">WassWCEMaxAffine</span><span class="p">(</span><span class="n">CVXPYProb</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wasserstein Worst Case Expectation Problem with Max of Affine Terms.</span>
+
+<span class="sd">    This class implements a generic solution for Cor 5.1 (i), eq (15a) with affine loss functions:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \\ell = \\max_k \\{ \\langle a_k,  \\xi \\rangle + b_k \\}</span>
+
+<span class="sd">    where</span>
+<span class="sd">        - xi (m x 1): the random variable for which we have samples</span>
+<span class="sd">        - a_k (m x 1): a vector that is either a constant vector or a scalar times a decision variable (cvxpy affine expression)</span>
+<span class="sd">        - b_k (1 x 1): a scalar or a 1-dimensional cvxpy affine expression</span>
+<span class="sd">        - :math:`\\langle \\cdot, \\cdot \\rangle` is the inner product</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">        Currently, this is only implemented for the 1-, 2-, and inf-norm cases.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">    ----------</span>
+<span class="sd">        num_samples: int:</span>
+<span class="sd">            The number of samples.</span>
+<span class="sd">        a_k_list: Number | array_like</span>
+<span class="sd">            A list of vectors that are either constant vectors or scalars times a decision variable.</span>
+<span class="sd">        b_k_list: array_like</span>
+<span class="sd">            A list of scalars or 1-dimensional cvxpy affine expressions.</span>
+<span class="sd">        support_C: np.ndarray, optional</span>
+<span class="sd">            The support matrix C. If None passed, the support is considered to be the real space.</span>
+<span class="sd">        support_d: np.ndarray, optional</span>
+<span class="sd">            The support vector d. If None passed, the support is considered to be the real space.</span>
+<span class="sd">        used_norm: int | np.inf, optional</span>
+<span class="sd">            The norm to be used. Either 1, 2, or infinity (np.inf). Default is 2.</span>
+<span class="sd">        vp_suffix: str, optional</span>
+<span class="sd">            The suffix for the variable/parameter names.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">instance_counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">a_k_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">b_k_list</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">support_C</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">support_d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">used_norm</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                 <span class="n">vp_suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># choose the cp variable and parameter suffix</span>
+        <span class="n">WassWCEMaxAffine</span><span class="o">.</span><span class="n">instance_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">vp_suffix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vp_suffix</span> <span class="o">=</span> <span class="s2">&quot;_wwcema&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">WassWCEMaxAffine</span><span class="o">.</span><span class="n">instance_counter</span><span class="p">)</span>
+
+        <span class="c1"># number of samples</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_samples</span> <span class="o">=</span> <span class="n">num_samples</span>
+
+        <span class="c1"># # loss function terms</span>
+        <span class="c1"># if a_k_list is None or a_k_list == []:</span>
+        <span class="c1">#     raise ValueError(&#39;Problem statement error: a_k_list must be non-empty&#39;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_a_k_list</span> <span class="o">=</span> <span class="n">a_k_list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_K</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_a_k_list</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_a_k_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Number</span><span class="p">):</span>  <span class="c1"># a_k is just a number</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_m</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a_k_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a_k_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="c1"># TODO: consider adding some logic to check if all values of a_k are similar in type/dimension</span>
+        <span class="c1">#     raise ValueError(&#39;a_k_list error: all value must be of the same dimension&#39;)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_b_k_list</span> <span class="o">=</span> <span class="n">b_k_list</span> <span class="k">if</span> <span class="n">b_k_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="c1"># if self._b_k_list:</span>
+        <span class="c1">#     if isinstance(self._b_k_list[0], Number):  # b_k is just a number</span>
+        <span class="c1">#         b_dim = 0</span>
+        <span class="c1">#     else:</span>
+        <span class="c1">#         b_dim = self._b_k_list[0].shape[0] if self._b_k_list[0].shape else 0</span>
+        <span class="c1"># TODO: consider adding some logic to check if all values of a_k are similar in type/dimension</span>
+        <span class="c1">#     raise ValueError(&#39;b_k_list error: all value must be of the same dimension&#39;)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b_k_list</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_b_k_list</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_K</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Dimension missmatch: b_k_list must either be empty or of the same dimension as a_k_list.&#39;</span><span class="p">)</span>
+        <span class="c1"># # TODO: add some type checking to make sure that a_k and b_k terms are cst or cvxpy affine expressions</span>
+        <span class="c1"># #  and of the right dimensions</span>
+
+        <span class="c1"># Random variable support: Xi = {xi | C xi &lt;= d}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span> <span class="o">=</span> <span class="n">support_C</span><span class="p">,</span> <span class="n">support_d</span>
+        <span class="k">if</span> <span class="n">support_C</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">support_d</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_use_gamma</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_d_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">support_C</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">support_d</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_use_gamma</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Random variable support error: Both C and d must be set.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># norm selection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_used_norm</span> <span class="o">=</span> <span class="n">used_norm</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_used_norm</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dual_norm</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_used_norm</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dual_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_used_norm</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dual_norm</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Chosen norm not supported.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Optimization variables due to problem reformulation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;lam&#39;</span> <span class="o">+</span> <span class="n">vp_suffix</span><span class="p">)</span>  <span class="c1"># dual problem lambda variable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_s</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_samples</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;s&#39;</span> <span class="o">+</span> <span class="n">vp_suffix</span><span class="p">)</span>  <span class="c1"># epigraph auxiliary variables</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_gamma</span><span class="p">:</span>  <span class="c1"># gamma terms s.t. gamma @ (d - C @ sample)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gamma</span> <span class="o">=</span> <span class="p">[</span><span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_K</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d_size</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;gamma_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">vp_suffix</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span>
+                           <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_samples</span><span class="p">)]</span>
+
+        <span class="c1"># Parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_eps</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;eps&#39;</span> <span class="o">+</span> <span class="n">vp_suffix</span><span class="p">)</span>  <span class="c1"># Wasserstain ball radius</span>
+        <span class="c1"># Random variable samples</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_samples</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Parameter</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;samples&#39;</span> <span class="o">+</span> <span class="n">vp_suffix</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_samples</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Parameter</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_samples</span><span class="p">,</span> <span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;samples&#39;</span> <span class="o">+</span> <span class="n">vp_suffix</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;m should be &gt;= 0, but that is not the case.&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_def_opt_pb_obj</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_constr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_def_opt_pb_contr</span><span class="p">()</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constr</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_def_opt_pb_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        defines the objective function</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Optimization Objective</span>
+        <span class="k">return</span> <span class="n">cp</span><span class="o">.</span><span class="n">Minimize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eps</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_samples</span> <span class="o">*</span> <span class="n">cp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_def_opt_pb_contr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        defines the constraints</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">constraints</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_samples</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_K</span><span class="p">):</span>
+                <span class="c1"># b_k + a_k @ xi_i + gamma_ik @ (d - C xi_i) &lt;= s_i</span>
+                <span class="n">lhs1</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b_k_list</span><span class="p">:</span>
+                    <span class="n">lhs1</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b_k_list</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="n">a_k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a_k_list</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="n">samp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_samples</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">lhs1</span> <span class="o">+=</span> <span class="n">a_k</span> <span class="o">@</span> <span class="n">samp</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">lhs1</span> <span class="o">+=</span> <span class="n">a_k</span> <span class="o">*</span> <span class="n">samp</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_gamma</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">lhs1</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gamma</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C</span> <span class="o">@</span> <span class="n">samp</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">lhs1</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gamma</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_C</span><span class="p">)</span> <span class="o">*</span> <span class="n">samp</span><span class="p">)</span>
+                <span class="n">constraints</span> <span class="o">+=</span> <span class="p">[</span><span class="n">lhs1</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+
+                <span class="c1"># dual_norm{C @ gamma_ik - a_k} &lt;= lambda</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_gamma</span><span class="p">:</span>
+                    <span class="n">lhs2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gamma</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">a_k</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">lhs2</span> <span class="o">=</span> <span class="o">-</span><span class="n">a_k</span>
+                <span class="n">constraints</span> <span class="o">+=</span> <span class="p">[</span><span class="n">cp</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">lhs2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dual_norm</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">]</span>
+
+            <span class="c1"># gamma_ik &gt;= 0</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_gamma</span><span class="p">:</span>
+                <span class="n">constraints</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_gamma</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">constraints</span></div>
+
+
+    <span class="c1"># TODO: consider implementing some operators.</span>
+
+
+<div class="viewcode-block" id="update_wass_wce_params">
+<a class="viewcode-back" href="../../cvxRiskOpt.html#cvxRiskOpt.wass_risk_opt_pb.update_wass_wce_params">[docs]</a>
+<span class="k">def</span> <span class="nf">update_wass_wce_params</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">samples</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Update the parameters associated with the WassWCEMaxAffine problem.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">    ----------</span>
+<span class="sd">        prob: WassWCEMaxAffine:</span>
+<span class="sd">            WassWCEMaxAffine problem</span>
+<span class="sd">        eps: int:</span>
+<span class="sd">            Wasserstein ball radius</span>
+<span class="sd">        samples: np.ndarray:</span>
+<span class="sd">            Data samples</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">prob</span><span class="o">.</span><span class="n">param_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="s1">&#39;eps&#39;</span> <span class="ow">in</span> <span class="n">par</span><span class="p">:</span>
+            <span class="n">prob</span><span class="o">.</span><span class="n">param_dict</span><span class="p">[</span><span class="n">par</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">eps</span>
+        <span class="k">if</span> <span class="s1">&#39;samples&#39;</span> <span class="ow">in</span> <span class="n">par</span><span class="p">:</span>
+            <span class="n">prob</span><span class="o">.</span><span class="n">param_dict</span><span class="p">[</span><span class="n">par</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">samples</span>
+    <span class="k">return</span></div>
+
+
+
+<div class="viewcode-block" id="WassDRExpectation">
+<a class="viewcode-back" href="../../cvxRiskOpt.html#cvxRiskOpt.wass_risk_opt_pb.WassDRExpectation">[docs]</a>
+<span class="k">class</span> <span class="nc">WassDRExpectation</span><span class="p">(</span><span class="n">WassWCEMaxAffine</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Provides a high-level implementation of the DR Expectation with a Wasserstein-based ambiguity set.</span>
+
+<span class="sd">    Implements</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \\sup_{\\mathbb{P} \\in \\mathcal{P}} \\quad \\mathbb{E}^\\mathbb{P} \\left[ \\langle a, \\xi \\rangle + b \\right]</span>
+
+<span class="sd">    where :math:`a, b` may contain decision variables and :math:`\\langle \\cdot, \\cdot \\rangle` is the inner product.</span>
+
+
+<span class="sd">    Arguments:</span>
+<span class="sd">    ----------</span>
+<span class="sd">        num_samples: int:</span>
+<span class="sd">            The number of samples.</span>
+<span class="sd">        a: int | float | cp.Variable | cp.Parameter | cp.Expression:</span>
+<span class="sd">            The &quot;a&quot; term in :math:`\\langle a, xi \\rangle + b`.</span>
+<span class="sd">        b: int | float | cp.Variable | cp.Parameter | cp.Expression, optional&quot;</span>
+<span class="sd">            The &quot;b&quot; term in :math:`\\langle a, xi \\rangle + b`. If not assigned, 0 is used.</span>
+<span class="sd">        support_C: np.ndarray, optional</span>
+<span class="sd">            The support matrix C. If None passed, the support is considered to be the real space.</span>
+<span class="sd">        support_d: np.ndarray, optional</span>
+<span class="sd">            The support vector d. If None passed, the support is considered to be the real space.</span>
+<span class="sd">        used_norm: int | np.inf, optional</span>
+<span class="sd">            The norm to be used. Either 1, 2, or infinity (np.inf). Default is 2.</span>
+<span class="sd">        vp_suffix: str, optional</span>
+<span class="sd">            The suffix for the variable/parameter names.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">instance_counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">a</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Parameter</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">,</span>
+                 <span class="n">b</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Parameter</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">support_C</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">support_d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">used_norm</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">vp_suffix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">WassDRExpectation</span><span class="o">.</span><span class="n">instance_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">vp_suffix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vp_suffix</span> <span class="o">=</span> <span class="s2">&quot;_wdre&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">WassDRExpectation</span><span class="o">.</span><span class="n">instance_counter</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">support_C</span><span class="p">,</span> <span class="n">support_d</span><span class="p">,</span> <span class="n">used_norm</span><span class="p">,</span> <span class="n">vp_suffix</span><span class="o">=</span><span class="n">vp_suffix</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_problems_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_used_norm</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">_used_norm</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Norms are different&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_samples</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">_num_samples</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Number of samples is different&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">_C</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">_d</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Supports are different&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># TODO: might be a good idea to check that the params used by both problems (xi and eps) are the same</span>
+
+    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;WassDRExpectation&quot;</span><span class="p">,</span> <span class="s2">&quot;CVXPYProb&quot;</span><span class="p">,</span> <span class="s2">&quot;WassDRCVaR&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">other</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">WassDRExpectation</span><span class="p">):</span>  <span class="c1"># DR-E + DR-E --&gt; just add a and b terms if problems match</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_problems_match</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a_k_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">_a_k_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">b1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b_k_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b_k_list</span> <span class="k">else</span> <span class="mi">0</span>
+                <span class="n">b2</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_b_k_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">_b_k_list</span> <span class="k">else</span> <span class="mi">0</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="n">b1</span> <span class="o">+</span> <span class="n">b2</span>
+                <span class="k">return</span> <span class="n">WassDRExpectation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_samples</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_used_norm</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">WassWCEMaxAffine</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_problems_match</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
+                <span class="n">a_expect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a_k_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">b_expect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b_k_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b_k_list</span> <span class="k">else</span> <span class="mi">0</span>
+
+                <span class="n">a_list_new</span> <span class="o">=</span> <span class="p">[</span><span class="n">a_expect</span> <span class="o">+</span> <span class="n">a_k_other</span> <span class="k">for</span> <span class="n">a_k_other</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">_a_k_list</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">b_expect</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">other</span><span class="o">.</span><span class="n">_b_k_list</span><span class="p">):</span>  <span class="c1"># no b terms in either problem</span>
+                    <span class="n">b_list_new</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">elif</span> <span class="n">b_expect</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># no b in DR-E. b term in other only</span>
+                    <span class="n">b_list_new</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_b_k_list</span>
+                <span class="k">elif</span> <span class="ow">not</span> <span class="n">other</span><span class="o">.</span><span class="n">_b_k_list</span><span class="p">:</span>  <span class="c1"># b in DR-E only. no b term in other</span>
+                    <span class="n">b_list_new</span> <span class="o">=</span> <span class="p">[</span><span class="n">b_expect</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">_a_k_list</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># b terms in both</span>
+                    <span class="n">b_list_new</span> <span class="o">=</span> <span class="p">[</span><span class="n">b_expect</span> <span class="o">+</span> <span class="n">b_other</span> <span class="k">for</span> <span class="n">b_other</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">_b_k_list</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">WassDRCVaR</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">WassDRCVaR</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">_num_samples</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">_m</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                      <span class="n">a_k_list</span><span class="o">=</span><span class="n">a_list_new</span><span class="p">,</span> <span class="n">b_k_list</span><span class="o">=</span><span class="n">b_list_new</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">_alpha</span><span class="p">,</span>
+                                      <span class="n">support_C</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">_C</span><span class="p">,</span> <span class="n">support_d</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="n">used_norm</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">_used_norm</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">WassWCEMaxAffine</span><span class="p">(</span><span class="n">num_samples</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">_num_samples</span><span class="p">,</span> <span class="n">a_k_list</span><span class="o">=</span><span class="n">a_list_new</span><span class="p">,</span> <span class="n">b_k_list</span><span class="o">=</span><span class="n">b_list_new</span><span class="p">,</span>
+                                            <span class="n">support_C</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">_C</span><span class="p">,</span> <span class="n">support_d</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="n">used_norm</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">_used_norm</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">CVXPYProb</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">CVXPYProb</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">objective</span><span class="p">,</span> <span class="n">unique_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraints</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">constraints</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;WassDRExpectation&quot;</span><span class="p">,</span> <span class="s2">&quot;CVXPYProb&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">WassDRExpectation</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_problems_match</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a_k_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">other</span><span class="o">.</span><span class="n">_a_k_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">b1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b_k_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b_k_list</span> <span class="k">else</span> <span class="mi">0</span>
+                <span class="n">b2</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_b_k_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">_b_k_list</span> <span class="k">else</span> <span class="mi">0</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="n">b1</span> <span class="o">-</span> <span class="n">b2</span>
+                <span class="k">return</span> <span class="n">WassDRExpectation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_samples</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_used_norm</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">CVXPYProb</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">CVXPYProb</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">-</span> <span class="n">other</span><span class="o">.</span><span class="n">objective</span><span class="p">,</span> <span class="n">unique_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraints</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">constraints</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;WassDRExpectation&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a_k_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">other</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b_k_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">other</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b_k_list</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">WassDRExpectation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_samples</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_used_norm</span><span class="p">)</span>
+
+    <span class="fm">__rmul__</span> <span class="o">=</span> <span class="fm">__mul__</span>
+
+    <span class="k">def</span> <span class="nf">__div__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;WassDRExpectation&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-8</span><span class="p">:</span>  <span class="c1"># basically division by zero</span>
+            <span class="k">raise</span> <span class="ne">ZeroDivisionError</span><span class="p">()</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a_k_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">other</span><span class="p">)</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b_k_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">other</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b_k_list</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">WassDRExpectation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_samples</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_used_norm</span><span class="p">)</span>
+
+    <span class="fm">__truediv__</span> <span class="o">=</span> <span class="n">__div__</span></div>
+
+
+    <span class="c1"># TODO: consider implementing the following</span>
+    <span class="c1">#   __neg__, __rsub__, __radd__</span>
+
+
+<div class="viewcode-block" id="WassDRCVaR">
+<a class="viewcode-back" href="../../cvxRiskOpt.html#cvxRiskOpt.wass_risk_opt_pb.WassDRCVaR">[docs]</a>
+<span class="k">class</span> <span class="nc">WassDRCVaR</span><span class="p">(</span><span class="n">WassWCEMaxAffine</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Provides a high-level implementation of the DR-CVaR with a Wasserstein-based ambiguity set.</span>
+
+<span class="sd">    Implements</span>
+
+<span class="sd">    .. math ::</span>
+
+<span class="sd">        \\sup_{\\mathbb{P} \\in \\mathcal{P}} \\quad  \\text{CVaR}_{\\alpha}^\\mathbb{P}\\left[ \\langle a, \\xi \\rangle + b \\right]</span>
+
+<span class="sd">    where :math:`a, b` may contain decision variables and :math:`\\langle \\cdot, \\cdot \\rangle` is the inner product.</span>
+<span class="sd">    :math:`\\alpha` is the CVaR level (average in alpha * 100% of the worst/highest cases)</span>
+
+<span class="sd">    Alternatively, this can also implement the CVaR reformulated form as a max of two affine terms:</span>
+
+<span class="sd">     .. math ::</span>
+
+<span class="sd">        \\sup_{\\mathbb{P} \\in \\mathcal{P}} \\quad  \\mathbb{E}^{\\mathbb{P}} \\max_{k \\in \\{1, 2\\}} \\left[ \\langle a_k, \\xi \\rangle + b_k \\right].</span>
+
+
+<span class="sd">    .. Note ::</span>
+
+<span class="sd">        Either &quot;a&quot; and &quot;b&quot; must be passed or &quot;a_k_list&quot; and &quot;b_k_list&quot;, but not both nor neither.</span>
+
+
+<span class="sd">    Arguments:</span>
+<span class="sd">    ----------</span>
+<span class="sd">        num_samples: int:</span>
+<span class="sd">            The number of samples.</span>
+<span class="sd">        xi_length: int:</span>
+<span class="sd">            Size of a sample. If :math:`\\xi` is m x 1 --&gt; xi_length = m</span>
+<span class="sd">        a: int | float | cp.Variable | cp.Parameter | cp.Expression, optional:</span>
+<span class="sd">            The &quot;a&quot; term in :math:`\\langle a, xi \\rangle + b`.</span>
+<span class="sd">            If this is passed, the &quot;b&quot; term is expected.</span>
+<span class="sd">            This should not be passed if &quot;a_k_list&quot; and &quot;b_k_list&quot; are passed.</span>
+<span class="sd">        b: int | float | cp.Variable | cp.Parameter | cp.Expression, optional, optional:</span>
+<span class="sd">            The &quot;b&quot; term in :math:`\\langle a, xi \\rangle + b`. If not assigned, 0 is used.</span>
+<span class="sd">            This should not be passed if &quot;a_k_list&quot; and &quot;b_k_list&quot; are passed.</span>
+<span class="sd">        a_k_list: Number | array_like, optional:</span>
+<span class="sd">            A list of vectors that are either constant vectors or scalars times a decision variable.</span>
+<span class="sd">            If this is passed, the &quot;b_k_list&quot; term is expected.</span>
+<span class="sd">            This should not be passed if &quot;a&quot; and &quot;b&quot; are passed.</span>
+<span class="sd">        b_k_list: array_like, optional:</span>
+<span class="sd">            A list of scalars or 1-dimensional cvxpy affine expressions.</span>
+<span class="sd">            This should not be passed if &quot;a&quot; and &quot;b&quot; are passed.</span>
+<span class="sd">        alpha: float, optional:</span>
+<span class="sd">            CVaR level (average in alpha * 100% of the worst/highest cases)</span>
+<span class="sd">        support_C: np.ndarray, optional</span>
+<span class="sd">            The support matrix C. If None passed, the support is considered to be the real space.</span>
+<span class="sd">        support_d: np.ndarray, optional</span>
+<span class="sd">            The support vector d. If None passed, the support is considered to be the real space.</span>
+<span class="sd">        used_norm: int | np.inf, optional</span>
+<span class="sd">            The norm to be used. Either 1, 2, or infinity (np.inf). Default is 2.</span>
+<span class="sd">        vp_suffix: str, optional</span>
+<span class="sd">            The suffix for the variable/parameter names.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">instance_counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">xi_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">a</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Parameter</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">b</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Parameter</span> <span class="o">|</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">a_k_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">b_k_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                 <span class="n">support_C</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">support_d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">used_norm</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">vp_suffix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="n">WassDRCVaR</span><span class="o">.</span><span class="n">instance_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">vp_suffix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vp_suffix</span> <span class="o">=</span> <span class="s2">&quot;_wdrcvar&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">WassDRCVaR</span><span class="o">.</span><span class="n">instance_counter</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+
+        <span class="k">if</span> <span class="n">a</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">a_k_list</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">b_k_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Option 1: provide a (optionally b). Option 2: provided a_k_list and b_k_list. Both failed.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">a</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">a_k_list</span><span class="p">,</span> <span class="n">b_k_list</span><span class="p">,</span> <span class="n">support_C</span><span class="p">,</span> <span class="n">support_d</span><span class="p">,</span> <span class="n">used_norm</span><span class="p">,</span> <span class="n">vp_suffix</span><span class="o">=</span><span class="n">vp_suffix</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;tau&#39;</span> <span class="o">+</span> <span class="n">vp_suffix</span><span class="p">)</span>
+            <span class="n">a1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">xi_length</span><span class="p">)</span>
+            <span class="n">a2</span> <span class="o">=</span> <span class="n">a</span> <span class="o">/</span> <span class="n">alpha</span>
+            <span class="n">b1</span> <span class="o">=</span> <span class="n">tau</span>
+            <span class="n">b2</span> <span class="o">=</span> <span class="n">b</span> <span class="o">/</span> <span class="n">alpha</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">tau</span>
+            <span class="n">a_k_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">]</span>
+            <span class="n">b_k_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">]</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">a_k_list</span><span class="p">,</span> <span class="n">b_k_list</span><span class="p">,</span> <span class="n">support_C</span><span class="p">,</span> <span class="n">support_d</span><span class="p">,</span> <span class="n">used_norm</span><span class="p">,</span> <span class="n">vp_suffix</span><span class="o">=</span><span class="n">vp_suffix</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_problems_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_used_norm</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">_used_norm</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Norms are different&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_samples</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">_num_samples</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Number of samples is different&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">_C</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">_d</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Supports are different&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">WassDRCVaR</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">_alpha</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">_alpha</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;CVaR alpha levels are different&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+        <span class="c1"># TODO: might be a good idea to check that the params used by both problems (xi and eps) are the same</span>
+
+    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;WassDRExpectation&quot;</span><span class="p">,</span> <span class="s2">&quot;CVXPYProb&quot;</span><span class="p">,</span> <span class="s2">&quot;WassDRCVaR&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">other</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">WassDRExpectation</span><span class="p">):</span>  <span class="c1"># DR-CVaR + DR-E special case --&gt; call __add__ in DR-E</span>
+            <span class="k">return</span> <span class="n">other</span> <span class="o">+</span> <span class="bp">self</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">CVXPYProb</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">CVXPYProb</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">objective</span><span class="p">,</span> <span class="n">unique_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraints</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">constraints</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;WassDRCVaR&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">other</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Multiplication is only supported with positive scalars&#39;</span><span class="p">)</span>
+        <span class="n">a_list_new</span> <span class="o">=</span> <span class="p">[</span><span class="n">a_k</span> <span class="o">*</span> <span class="n">other</span> <span class="k">for</span> <span class="n">a_k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a_k_list</span><span class="p">]</span>
+        <span class="n">b_list_new</span> <span class="o">=</span> <span class="p">[</span><span class="n">b_k</span> <span class="o">*</span> <span class="n">other</span> <span class="k">for</span> <span class="n">b_k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b_k_list</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">WassDRCVaR</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">a_k_list</span><span class="o">=</span><span class="n">a_list_new</span><span class="p">,</span> <span class="n">b_k_list</span><span class="o">=</span><span class="n">b_list_new</span><span class="p">,</span>
+                          <span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_alpha</span><span class="p">,</span> <span class="n">support_C</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_C</span><span class="p">,</span>
+                          <span class="n">support_d</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="n">used_norm</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_used_norm</span><span class="p">)</span>
+
+    <span class="fm">__rmul__</span> <span class="o">=</span> <span class="fm">__mul__</span>
+
+    <span class="k">def</span> <span class="nf">__div__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;WassDRCVaR&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-8</span><span class="p">:</span>  <span class="c1"># basically division by zero</span>
+            <span class="k">raise</span> <span class="ne">ZeroDivisionError</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">other</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span>
+
+    <span class="fm">__truediv__</span> <span class="o">=</span> <span class="n">__div__</span></div>
+
+
+    <span class="c1"># TODO: consider implementing the rest of the operators.</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">cvxRiskOpt</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install/index.html">Install</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">cvxRiskOpt</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Sleiman Safaoui, Tyler Summers.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
