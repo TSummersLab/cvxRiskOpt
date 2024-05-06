@@ -11,7 +11,7 @@ def generate_gaussian_samples(mu, std_div, num_samples):
     return np.random.normal(mu, std_div, num_samples)
 
 
-def portfolio_optimization(solver=cp.CLARABEL):
+def portfolio_optimization(solver=cp.CLARABEL, verbose=True):
     """
     Solves:
     min sum(x_i)
@@ -41,13 +41,14 @@ def portfolio_optimization(solver=cp.CLARABEL):
     prob = cp.Problem(cp.Minimize(cp.sum(x)), [x >= 0, constr])
     prob.solve(solver=cp.CLARABEL)
     x_val = x.value
-    print("Reference investment: ", x_val)
-    ret = 0
-    for i in range(num_samples):
-        ret += x_val @ dataset[i, :]
-    ret /= num_samples
-    print("Return: ", ret)
-    print("Minimum desired: ", r0)
+    if verbose:
+        print("Reference investment: ", x_val)
+        ret = 0
+        for i in range(num_samples):
+            ret += x_val @ dataset[i, :]
+        ret /= num_samples
+        print("Return: ", ret)
+        print("Minimum desired: ", r0)
 
     from cvxRiskOpt.cclp_risk_opt import cclp_gauss
     cc_contsr = cclp_gauss(eps, a=-x, b=r0, xi1_hat=r_mean, gam11=np.diag(r_sigma))
@@ -55,13 +56,14 @@ def portfolio_optimization(solver=cp.CLARABEL):
                       [x >= 0, cc_contsr])
     prob2.solve(solver=solver)
     x_val2 = x.value
-    print("Invest based on problem: ", x_val2)
-    ret = 0
-    for i in range(num_samples):
-        ret += x_val2 @ dataset[i, :]
-    ret /= num_samples
-    print("Return: ", ret)
-    print("Minimum desired: ", r0)
+    if verbose:
+        print("Invest based on problem: ", x_val2)
+        ret = 0
+        for i in range(num_samples):
+            ret += x_val2 @ dataset[i, :]
+        ret /= num_samples
+        print("Return: ", ret)
+        print("Minimum desired: ", r0)
 
     # DRO Cent Sym
     from cvxRiskOpt.cclp_risk_opt import cclp_dro_mean_cov
@@ -70,13 +72,14 @@ def portfolio_optimization(solver=cp.CLARABEL):
                        [x >= 0, cc_contsr])
     prob3.solve(solver=solver)
     x_val3 = x.value
-    print("Invest based on DRO problem: ", x_val3)
-    ret = 0
-    for i in range(num_samples):
-        ret += x_val3 @ dataset[i, :]
-    ret /= num_samples
-    print("Return: ", ret)
-    print("Minimum desired: ", r0)
+    if verbose:
+        print("Invest based on DRO problem: ", x_val3)
+        ret = 0
+        for i in range(num_samples):
+            ret += x_val3 @ dataset[i, :]
+        ret /= num_samples
+        print("Return: ", ret)
+        print("Minimum desired: ", r0)
 
     # DRO
     cc_contsr = cclp_dro_mean_cov(eps, a=-x, b=r0, xi1_hat=r_mean, gam11=np.diag(r_sigma), centrally_symmetric=False)
@@ -84,13 +87,14 @@ def portfolio_optimization(solver=cp.CLARABEL):
                        [x >= 0, cc_contsr])
     prob4.solve(solver=solver)
     x_val4 = x.value
-    print("Invest based on DRO problem: ", x_val4)
-    ret = 0
-    for i in range(num_samples):
-        ret += x_val4 @ dataset[i, :]
-    ret /= num_samples
-    print("Return: ", ret)
-    print("Minimum desired: ", r0)
+    if verbose:
+        print("Invest based on DRO problem: ", x_val4)
+        ret = 0
+        for i in range(num_samples):
+            ret += x_val4 @ dataset[i, :]
+        ret /= num_samples
+        print("Return: ", ret)
+        print("Minimum desired: ", r0)
 
 
 def moment_portfolio_optimization(num_sim=200, use_cpg=True, gen_code=True, keep_init_run=False, solver=cp.CLARABEL):

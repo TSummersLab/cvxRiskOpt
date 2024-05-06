@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import cvxpy as cp
 
-VERBOSE = True  # set to True to print additional data
+VERBOSE = False  # set to True to print additional data
 
 
 class TestCCLPRiskOptHelperFunctions(unittest.TestCase):
@@ -309,28 +309,31 @@ class TestCCLPRiskOptFunctions(unittest.TestCase):
         # b is a constant
         eps = 0.1
 
-        print("~~~~~~~~~")
+        if VERBOSE:
+            print("~~~~~~~~~")
         xi_mean = 0
         xi_var = 0.01
         x = cp.Variable(name='x')
         b = 1
         constr = cclp_gauss(eps, a=x, b=b, xi1_hat=xi_mean, gam11=xi_var)
         known_reform = gauss.ppf(1-eps) * cp.norm(np.sqrt(xi_var) * x) + x * xi_mean + b <= 0
-        print(constr.expr)
-        print(known_reform)
+        if VERBOSE:
+            print(constr.expr)
+            print(known_reform)
 
-        print("~~~~~~~~~")
+            print("~~~~~~~~~")
         xi_mean = np.array([0, 0])
         xi_var = np.diag([0.01, 0.1])
         x = cp.Variable(2, name='x')
         b = 1
         constr = cclp_gauss(eps, a=x, b=b, xi1_hat=xi_mean, gam11=xi_var)
         known_reform = gauss.ppf(1 - eps) * cp.norm(sqrtm(xi_var) @ x) + (x @ xi_mean + b) <= 0
-        print(constr.expr)
-        print(known_reform.expr)
-        # print(str(constr.expr) == str(known_reform.expr))
+        if VERBOSE:
+            print(constr.expr)
+            print(known_reform.expr)
+            # print(str(constr.expr) == str(known_reform.expr))
 
-        print("~~~~~~~~~")
+            print("~~~~~~~~~")
         a = np.array([1, 0])
         x = cp.Variable(2, name='x')
         xi_mean = np.array([0, 0]) + x
@@ -338,8 +341,9 @@ class TestCCLPRiskOptFunctions(unittest.TestCase):
         b = 0
         constr = cclp_gauss(eps, a=a, b=b, xi1_hat=xi_mean, gam11=xi_var)
         known_reform = gauss.ppf(1 - eps) * cp.norm(sqrtm(xi_var) @ a) + (a @ xi_mean + b) <= 0
-        print(constr.expr)
-        print(known_reform.expr)
+        if VERBOSE:
+            print(constr.expr)
+            print(known_reform.expr)
 
     def test_simple_1D_mpc(self):
         from examples.cclp_mpc import simple_1d_mpc
@@ -365,8 +369,13 @@ class TestCCLPRiskOptFunctions(unittest.TestCase):
     def test_portfolio_opt(self):
         from examples.cclp_portfolio_optimization import portfolio_optimization, moment_portfolio_optimization
         solver = cp.CLARABEL
-        portfolio_optimization(solver=solver)
+        portfolio_optimization(solver=solver, verbose=VERBOSE)
         moment_portfolio_optimization(num_sim=1, use_cpg=False, gen_code=False, solver=solver)
+
+    def test_production_opt(self):
+        from examples.cclp_safe_production_optimization import production_optimization
+        cvxpy_x, cro_x = production_optimization(verbose=VERBOSE)
+        self.assertTrue(np.allclose(cvxpy_x, cro_x, rtol=1e-4, atol=1e-4))
 
 
 if __name__ == '__main__':
