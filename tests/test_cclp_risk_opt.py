@@ -297,7 +297,7 @@ class TestCCLPRiskOptHelperFunctions(unittest.TestCase):
 
 
 class TestCCLPRiskOptFunctions(unittest.TestCase):
-    def  test_cclp_gauss(self):
+    def test_cclp_gauss(self):
         import cvxpy as cp
         from cvxRiskOpt.cclp_risk_opt import cclp_gauss
         from scipy.stats import norm as gauss
@@ -341,7 +341,6 @@ class TestCCLPRiskOptFunctions(unittest.TestCase):
         print(constr.expr)
         print(known_reform.expr)
 
-
     def test_simple_1D_mpc(self):
         from examples.cclp_mpc import simple_1d_mpc
         x1, u1 = simple_1d_mpc(use_cpg=False, gen_cpg=False, with_cclp=False, seed=1)
@@ -358,6 +357,10 @@ class TestCCLPRiskOptFunctions(unittest.TestCase):
     def test_hvac_mpc(self):
         from examples.cclp_mpc import hvac_mpc_time_varying_constraints
         hvac_mpc_time_varying_constraints(plot_res=False)
+
+    def test_hvac_mpc_reg(self):
+        from examples.cclp_mpc import temp_mpc_regulator_time_varying_constraints
+        temp_mpc_regulator_time_varying_constraints(plot_res=False)
 
 
 if __name__ == '__main__':

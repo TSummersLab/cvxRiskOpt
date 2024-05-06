@@ -8,6 +8,7 @@ from scipy.stats import norm
 import time
 import csv
 
+
 def generate_gaussian_samples(mu, std_div, num_samples):
     return np.random.normal(mu, std_div, num_samples)
 
@@ -56,9 +57,19 @@ def simple_1d_mpc(use_cpg=False, gen_cpg=False, with_cclp=False, plot_res=False,
     if with_cclp:
         # Prob(x > 2) >= 1-eps
         w_var = 0.01  # noise variance
-        constr += [state[1:] >= 2 + norm.ppf(1-eps) * np.array([np.sqrt(w_var * t) for t in range(1, T+1)])]
+        from cvxRiskOpt.cclp_risk_opt import cclp_gauss
         for t in range(1, T+1):
-            # print("x(", t, ") >= ", 2 + norm.ppf(1 - eps) * np.sqrt(w_var * t))
+            constr += [cclp_gauss(eps=eps,
+                                  a=1,
+                                  b=2,
+                                  xi1_hat=-state[t],
+                                  gam11=(w_var * t)
+                                  )]
+        # above for loop replaces this:
+        # constr += [state[1:] >= 2 + norm.ppf(1 - eps) * np.array([np.sqrt(w_var * t) for t in range(1, T + 1)])]
+        # show how the reformulation matches the known reformulation
+        for t in range(1, T+1):
+            print(cclp_gauss(eps=eps, a=1, b=2, xi1_hat=-state[t], gam11=(w_var * t)).expr)
             print("x({}) >= {}".format(t, 2 + norm.ppf(1 - eps) * np.sqrt(w_var * t)))
     else:
         # x > 2
@@ -135,7 +146,6 @@ def simple_2d_mpc(use_cpg=False, gen_cpg=False, plot_res=False, keep_init_run=Fa
     w_cov = np.diag([0.1, 0.01])
     # initial state
     x0_mean = np.array([-2, -0.8])
-    # x0_cov = np.zeros((2, 2))
     # LQ objective cost matrices
     Q = np.diag([1, 1])
     R = np.diag([1, 1])
@@ -305,7 +315,7 @@ def hvac_mpc_time_varying_constraints(plot_res=False):  # (use_cpg=False, gen_cp
         plt.plot(np.linspace(0, total_days * 24, total_inputs), outdoor_temps, 'b')
 
     x_cur = outdoor_temps[0]
-    w_cov = 1  # 1
+    w_cov = 1
 
     # Problem setup
     Q = 100
@@ -330,8 +340,11 @@ def hvac_mpc_time_varying_constraints(plot_res=False):  # (use_cpg=False, gen_cp
         obj += xQx
         obj += cp.square(r[t + 1]) * Q
         obj -= 2 * data["x_mean"] * Q * r[t + 1]  # not DPP!
-
         obj += cp.square(u[t]) * R
+        # Note: tracking objective results in product of parameters which is not DPP.
+        # manual reformulation is possible into DPP.
+        # because *this* formulation is not DPP --> cannot use codegen.
+        # might introduce a solution to this problem later
 
         constr += [x[t + 1] == nom_dyn(x[t], u[t], w[t])]
         constr += [cp.abs(u) <= 15]
@@ -349,14 +362,7 @@ def hvac_mpc_time_varying_constraints(plot_res=False):  # (use_cpg=False, gen_cp
                               gam11=data["x_cov"],
                               assume_sym=True, assume_psd=True
                               )]
-        # print("tight: ", norm.ppf(1 - eps) * data["x_cov"])
     prob = cp.Problem(cp.Minimize(obj), constr)
-
-    # if use_cpg:
-    #     if gen_cpg:
-    #         cpg.generate_code(prob, code_dir='hvac_mpc', solver=cp.CLARABEL)
-    #     from hvac_mpc.cpg_solver import cpg_solve
-    #     prob.register_solve('cpg', cpg_solve)
 
     for t in range(total_inputs - horizon - 1):
         x0.value = x_cur
@@ -364,10 +370,6 @@ def hvac_mpc_time_varying_constraints(plot_res=False):  # (use_cpg=False, gen_cp
         xmin.value = np.array(min_indoor_temps[t:t + horizon + 1])
         xmax.value = np.array(max_indoor_temps[t:t + horizon + 1])
         w.value = np.array(outdoor_temps[t:t+horizon])
-        # if use_cpg:
-        #     prob.solve(method='cpg', updated_params=['x0', 'r', 'xmin', 'xmax', 'w'])
-        # else:
-        #     prob.solve(cp.CLARABEL)
         prob.solve(cp.CLARABEL)
         print(prob.status)
         print('x: ', x.value)
@@ -564,16 +566,7 @@ def temp_mpc_regulator_time_varying_constraints(horizon=10, inputs_per_hr=4, tot
 
 
 if __name__ == "__main__":
-    # simple_1d_mpc(use_cpg=False, gen_cpg=False, with_cclp=True, plot_res=True)
-    # simple_2d_mpc(use_cpg=False, gen_cpg=False, plot_res=True)
-    # hvac_mpc_time_varying_constraints(plot_res=True)
+    simple_1d_mpc(use_cpg=False, gen_cpg=False, with_cclp=True, plot_res=True)
+    simple_2d_mpc(use_cpg=False, gen_cpg=False, plot_res=True)
+    hvac_mpc_time_varying_constraints(plot_res=True)
     temp_mpc_regulator_time_varying_constraints(plot_res=True, use_cpg=False, gen_cpg=False)
-
-    # solver = cp.SCS
-    # t_test = simple_2d_mpc(use_cpg=False, gen_cpg=False, plot_res=False, keep_init_run=False, solver=solver)
-    # t_test_codegen = simple_2d_mpc(use_cpg=True, gen_cpg=True, plot_res=False, keep_init_run=False, solver=solver)
-    #
-    # with open('simple_mpc_2d_{}.csv'.format(solver), 'a', newline='') as file:
-    #     writer = csv.writer(file)
-    #     for t in range(len(t_test_codegen)):
-    #         writer.writerow([t_test[t], t_test_codegen[t], solver])
