@@ -93,7 +93,7 @@ def portfolio_optimization(solver=cp.CLARABEL):
     print("Minimum desired: ", r0)
 
 
-def moment_portfolio_optimization(num_samples=10, num_sim=200, gen_code=True, keep_init_run=False, solver=cp.CLARABEL):
+def moment_portfolio_optimization(num_sim=200, use_cpg=True, gen_code=True, keep_init_run=False, solver=cp.CLARABEL):
     """
     Solves:
     min sum(x_i)
@@ -132,37 +132,40 @@ def moment_portfolio_optimization(num_samples=10, num_sim=200, gen_code=True, ke
         t_test.append(te - ts)
         x_test.append(x.value)
 
-    if gen_code:
-        cpg.generate_code(prob, code_dir='portfolio_opt', solver=solver)
-    from portfolio_opt.cpg_solver import cpg_solve
-    prob.register_solve('cpg', cpg_solve)
-    for sim in range(num_sim + additional_run):
-        ts = time.time()
-        prob.solve(method='cpg', updated_params=["r0"])
-        te = time.time()
-        if sim == 0 and not keep_init_run:
-            continue
-        t_test_codegen.append(te - ts)
-        x_test_codegen.append(x.value)
+    if use_cpg:
+        if gen_code:
+            cpg.generate_code(prob, code_dir='portfolio_opt', solver=solver)
+        from portfolio_opt.cpg_solver import cpg_solve
+        prob.register_solve('cpg', cpg_solve)
+        for sim in range(num_sim + additional_run):
+            ts = time.time()
+            prob.solve(method='cpg', updated_params=["r0"])
+            te = time.time()
+            if sim == 0 and not keep_init_run:
+                continue
+            t_test_codegen.append(te - ts)
+            x_test_codegen.append(x.value)
 
-    for t, (xt, xtc) in enumerate(zip(x_test, x_test_codegen)):
-        if not np.allclose(xt, xtc, rtol=1e-5, atol=1e-5):
-            print("Sim {} results not close enough (xt, xtc)!".format(t))
+        for t, (xt, xtc) in enumerate(zip(x_test, x_test_codegen)):
+            if not np.allclose(xt, xtc, rtol=1e-5, atol=1e-5):
+                print("Sim {} results not close enough (xt, xtc)!".format(t))
+
     return t_test, t_test_codegen
 
 
 if __name__ == "__main__":
-    # portfolio_optimization()
     solver = cp.ECOS
+    portfolio_optimization(solver)
     t_test, t_test_codegen = (
-        moment_portfolio_optimization(num_samples=10,
-                                      num_sim=200,
-                                      gen_code=False,
+        moment_portfolio_optimization(num_sim=200,
+                                      use_cpg=True,
+                                      gen_code=True,
                                       keep_init_run=False,
                                       solver=solver))
-    print(t_test)
-    print(t_test_codegen)
-    with open('portfolio_optimization_results_{}.csv'.format(solver), 'a', newline='') as file:
-        writer = csv.writer(file)
-        for t in range(len(t_test_codegen)):
-            writer.writerow([t_test[t], t_test_codegen[t], solver])
+    # # Uncomment below to save results
+    # print(t_test)
+    # print(t_test_codegen)
+    # with open('portfolio_optimization_results_{}.csv'.format(solver), 'a', newline='') as file:
+    #     writer = csv.writer(file)
+    #     for t in range(len(t_test_codegen)):
+    #         writer.writerow([t_test[t], t_test_codegen[t], solver])

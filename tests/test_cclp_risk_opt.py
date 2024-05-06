@@ -362,6 +362,12 @@ class TestCCLPRiskOptFunctions(unittest.TestCase):
         from examples.cclp_mpc import temp_mpc_regulator_time_varying_constraints
         temp_mpc_regulator_time_varying_constraints(plot_res=False)
 
+    def test_portfolio_opt(self):
+        from examples.cclp_portfolio_optimization import portfolio_optimization, moment_portfolio_optimization
+        solver = cp.CLARABEL
+        portfolio_optimization(solver=solver)
+        moment_portfolio_optimization(num_sim=1, use_cpg=False, gen_code=False, solver=solver)
+
 
 if __name__ == '__main__':
     unittest.main()
