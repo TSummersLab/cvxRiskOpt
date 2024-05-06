@@ -88,6 +88,8 @@ def _cp_sqrt_quad_form(v: np.ndarray | cp.Variable | cp.Expression,
         if not psd:
             raise ValueError("Input matrix mat is not PSD")
     matsqrt = scipy.linalg.sqrtm(mat)
+    if isinstance(v, np.ndarray):
+        return np.linalg.norm(matsqrt @ v)
     return cp.norm(matsqrt @ v)
 
 
@@ -144,6 +146,8 @@ def _check_a_xi1_term(a: int | float | list | np.ndarray | cp.Variable | cp.Expr
             a_len = 1
             a = np.array([a])
         elif isinstance(a, (cp.Variable, cp.Expression)):
+            if a.shape == ():
+                a = cp.reshape(a, (1, ))
             a_len = a.shape[0]
         elif isinstance(a, list):
             a = np.array(a)

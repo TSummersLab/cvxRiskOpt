@@ -446,19 +446,16 @@ def temp_mpc_regulator_time_varying_constraints(horizon=10, inputs_per_hr=4, tot
     total_inputs = total_days * 24 * inputs_per_hr
 
     # outdoor temp (nominal)
-    # hours       = [0,   1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
     outdoor_temps = [-15, -15, -12, -10, -7, -6, -5, -4, -3, -2, 0, 1, 3, 5, 7, 10, 13, 15, 16, 17, 18, 19, 20, 20]
     outdoor_temps = generate_signal(outdoor_temps, inputs_per_hr)
     outdoor_temps *= total_days
 
     # min indoor temp
-    # hours          = [0,   1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
     min_indoor_temps = [-8, -8, -8, -7, -7, -6, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -4, -3, -3, -2, -2, -2]
     min_indoor_temps = generate_signal(min_indoor_temps, inputs_per_hr)
     min_indoor_temps *= total_days
 
     # max indoor temp
-    # hours          = [0,   1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
     max_indoor_temps = [3, 3, 3, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 7, 7, 7, 7]
     max_indoor_temps = generate_signal(max_indoor_temps, inputs_per_hr)
     max_indoor_temps *= total_days
@@ -470,7 +467,7 @@ def temp_mpc_regulator_time_varying_constraints(horizon=10, inputs_per_hr=4, tot
         plt.plot(np.linspace(0, total_days * 24, total_inputs), outdoor_temps, 'b')
 
     x_cur = -11
-    w_cov = 1  # 1
+    w_cov = 1
 
     # Problem setup
     Q = 100

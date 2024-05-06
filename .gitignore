@@ -14,6 +14,7 @@ examples/mpc
 examples/hvac_mpc
 examples/temp_reg_mpc
 examples/mhe_1d
+examples/mhe_double_integ
 examples/MPC_code
 examples/simple_mpc_1d
 examples/simple_mpc_2d

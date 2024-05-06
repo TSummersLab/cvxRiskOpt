@@ -297,6 +297,51 @@ class TestCCLPRiskOptHelperFunctions(unittest.TestCase):
 
 
 class TestCCLPRiskOptFunctions(unittest.TestCase):
+    def  test_cclp_gauss(self):
+        import cvxpy as cp
+        from cvxRiskOpt.cclp_risk_opt import cclp_gauss
+        from scipy.stats import norm as gauss
+        from scipy.linalg import sqrtm
+        # simple test for Prob(x * xi + b <= 0) >= 1-eps
+        # where
+        # x is a decision variable
+        # xi is a random variable
+        # b is a constant
+        eps = 0.1
+
+        print("~~~~~~~~~")
+        xi_mean = 0
+        xi_var = 0.01
+        x = cp.Variable(name='x')
+        b = 1
+        constr = cclp_gauss(eps, a=x, b=b, xi1_hat=xi_mean, gam11=xi_var)
+        known_reform = gauss.ppf(1-eps) * cp.norm(np.sqrt(xi_var) * x) + x * xi_mean + b <= 0
+        print(constr.expr)
+        print(known_reform)
+
+        print("~~~~~~~~~")
+        xi_mean = np.array([0, 0])
+        xi_var = np.diag([0.01, 0.1])
+        x = cp.Variable(2, name='x')
+        b = 1
+        constr = cclp_gauss(eps, a=x, b=b, xi1_hat=xi_mean, gam11=xi_var)
+        known_reform = gauss.ppf(1 - eps) * cp.norm(sqrtm(xi_var) @ x) + (x @ xi_mean + b) <= 0
+        print(constr.expr)
+        print(known_reform.expr)
+        # print(str(constr.expr) == str(known_reform.expr))
+
+        print("~~~~~~~~~")
+        a = np.array([1, 0])
+        x = cp.Variable(2, name='x')
+        xi_mean = np.array([0, 0]) + x
+        xi_var = np.diag([0.01, 0.1])
+        b = 0
+        constr = cclp_gauss(eps, a=a, b=b, xi1_hat=xi_mean, gam11=xi_var)
+        known_reform = gauss.ppf(1 - eps) * cp.norm(sqrtm(xi_var) @ a) + (a @ xi_mean + b) <= 0
+        print(constr.expr)
+        print(known_reform.expr)
+
+
     def test_simple_1D_mpc(self):
         from examples.cclp_mpc import simple_1d_mpc
         x1, u1 = simple_1d_mpc(use_cpg=False, gen_cpg=False, with_cclp=False, seed=1)
