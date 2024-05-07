@@ -13,7 +13,7 @@ sys.path.append(os.path.abspath('..'))
 project = 'cvxRiskOpt'
 copyright = '2024, Sleiman Safaoui, Tyler Summers'
 author = 'Sleiman Safaoui, Tyler Summers'
-release = '0.1.3'
+release = '0.1.4'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
