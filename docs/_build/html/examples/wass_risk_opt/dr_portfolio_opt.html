@@ -57,8 +57,12 @@ The support set is given by <span class="math notranslate nohighlight">\(\Xi = \
 <p>The distributionally robust mean-cvar optimization problem, as described in <a class="reference internal" href="#esfahani2018" id="id2"><span>[Esfahani2018]</span></a> with <span class="math notranslate nohighlight">\(\Xi = \mathbb{R}^m\)</span> and using the 1-norm so that the dual norm is the <span class="math notranslate nohighlight">\(\infty\)</span> norm, can be encoded using cvxRiskOpt as follows:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">cvxpy</span> <span class="k">as</span> <span class="nn">cp</span>
+<span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">normal</span> <span class="k">as</span> <span class="n">gauss</span>
 <span class="kn">from</span> <span class="nn">cvxRiskOpt.wass_risk_opt_pb</span> <span class="kn">import</span> <span class="n">WassDRExpectation</span><span class="p">,</span> <span class="n">WassDRCVaR</span>
+
+<span class="n">solver</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">CLARABEL</span>
+
 
 <span class="k">def</span> <span class="nf">generate_esfahani_portfolio_prob_dataset</span><span class="p">(</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">num_assets</span><span class="p">,</span> <span class="n">num_simulations</span><span class="p">):</span>
     <span class="c1"># parameters</span>
@@ -77,7 +81,7 @@ The support set is given by <span class="math notranslate nohighlight">\(\Xi = \
     <span class="k">return</span> <span class="n">xi_dataset</span>
 
 <span class="n">eps</span> <span class="o">=</span> <span class="mf">0.01</span>  <span class="c1"># Wasserstein radius</span>
-<span class="n">num_samples</span> <span class="o">=</span> <span class="mi">25</span>
+<span class="n">num_samples</span> <span class="o">=</span> <span class="mi">100</span>
 
 <span class="c1"># problem settings</span>
 <span class="n">num_assets</span> <span class="o">=</span> <span class="mi">10</span>
@@ -111,16 +115,22 @@ The support set is given by <span class="math notranslate nohighlight">\(\Xi = \
             <span class="n">test_prob</span><span class="o">.</span><span class="n">param_dict</span><span class="p">[</span><span class="n">par</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">eps</span>
         <span class="k">if</span> <span class="s1">&#39;samples&#39;</span> <span class="ow">in</span> <span class="n">par</span><span class="p">:</span>
             <span class="n">test_prob</span><span class="o">.</span><span class="n">param_dict</span><span class="p">[</span><span class="n">par</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">xi</span>
-    <span class="n">test_prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">CLARABEL</span><span class="p">)</span>
+    <span class="n">test_prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span>
+        <span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">)</span>  <span class="c1"># cvxpy&#39;s first run is usually slower than all other solves. Solve once before timing it</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">test_prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">)</span>
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="n">test_result</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">value</span>
     <span class="n">x_test</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">test_result</span><span class="p">)</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Portfolio distribution: &quot;</span><span class="p">,</span> <span class="n">x_test</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Solve Time: </span><span class="si">%.3f</span><span class="s2"> ms&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">1000</span> <span class="o">*</span> <span class="p">(</span><span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)))</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Portfolio</span> <span class="n">distribution</span><span class="p">:</span>  <span class="p">[</span><span class="n">array</span><span class="p">([</span><span class="mf">5.30878878e-11</span><span class="p">,</span> <span class="mf">5.75609346e-11</span><span class="p">,</span> <span class="mf">4.01569505e-10</span><span class="p">,</span> <span class="mf">2.26943160e-01</span><span class="p">,</span>
-       <span class="mf">5.28422920e-11</span><span class="p">,</span> <span class="mf">2.03573625e-01</span><span class="p">,</span> <span class="mf">2.26943187e-01</span><span class="p">,</span> <span class="mf">2.26943184e-01</span><span class="p">,</span>
-       <span class="mf">1.15596836e-01</span><span class="p">,</span> <span class="mf">8.42485446e-09</span><span class="p">])]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Portfolio</span> <span class="n">distribution</span><span class="p">:</span>  <span class="p">[</span><span class="n">array</span><span class="p">([</span><span class="mf">5.49843425e-10</span><span class="p">,</span> <span class="mf">7.01795140e-10</span><span class="p">,</span> <span class="mf">1.47961976e-09</span><span class="p">,</span> <span class="mf">6.67777003e-02</span><span class="p">,</span>
+   <span class="mf">1.32029716e-01</span><span class="p">,</span> <span class="mf">1.74495485e-01</span><span class="p">,</span> <span class="mf">1.74497468e-01</span><span class="p">,</span> <span class="mf">1.73936079e-01</span><span class="p">,</span>
+   <span class="mf">1.42893790e-01</span><span class="p">,</span> <span class="mf">1.35369758e-01</span><span class="p">])]</span>
+<span class="n">Solve</span> <span class="n">Time</span><span class="p">:</span> <span class="mf">20.528</span> <span class="n">ms</span>
 </pre></div>
 </div>
 <p>Note that compared to the code above which uses cvxRiskOpt, the CVXPY-only implementation of the problem, after its manual reformulation, is given by:</p>
@@ -180,6 +190,33 @@ The support set is given by <span class="math notranslate nohighlight">\(\Xi = \
 <span class="n">test_prob</span> <span class="o">=</span> <span class="n">expect_part</span> <span class="o">+</span> <span class="n">rho</span> <span class="o">*</span> <span class="n">cvar_part</span> <span class="o">+</span> <span class="n">portfolio_constr</span>
 </pre></div>
 </div>
+</section>
+<section id="generating-c-code">
+<h2>Generating C code<a class="headerlink" href="#generating-c-code" title="Link to this heading">¶</a></h2>
+<p>We can also generate C code for the CVXPY Problem instance above using CVXPYgen. This can be done as shown below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cvxpygen</span> <span class="kn">import</span> <span class="n">cpg</span>
+<span class="n">cpg</span><span class="o">.</span><span class="n">generate_code</span><span class="p">(</span><span class="n">test_prob</span><span class="p">,</span> <span class="n">code_dir</span><span class="o">=</span><span class="s1">&#39;dr_portfolio_opt&#39;</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">dr_portfolio_opt.cpg_solver</span> <span class="kn">import</span> <span class="n">cpg_solve</span>
+<span class="n">test_prob</span><span class="o">.</span><span class="n">register_solve</span><span class="p">(</span><span class="s1">&#39;cpg&#39;</span><span class="p">,</span> <span class="n">cpg_solve</span><span class="p">)</span>
+<span class="n">update_params</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># get the list of parameters that should be updated</span>
+<span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">test_prob</span><span class="o">.</span><span class="n">param_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+    <span class="k">if</span> <span class="s1">&#39;eps&#39;</span> <span class="ow">in</span> <span class="n">par</span> <span class="ow">or</span> <span class="s1">&#39;samples&#39;</span> <span class="ow">in</span> <span class="n">par</span><span class="p">:</span>
+        <span class="n">update_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">par</span><span class="p">)</span>
+<span class="n">test_prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;cpg&#39;</span><span class="p">,</span> <span class="n">updated_params</span><span class="o">=</span><span class="n">update_params</span><span class="p">)</span>
+<span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">test_prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;cpg&#39;</span><span class="p">,</span> <span class="n">updated_params</span><span class="o">=</span><span class="n">update_params</span><span class="p">)</span>
+<span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Portfolio distribution with codegen: &quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Solve Time: </span><span class="si">%.3f</span><span class="s2"> ms&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">1000</span> <span class="o">*</span> <span class="p">(</span><span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)))</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Portfolio</span> <span class="n">distribution</span> <span class="k">with</span> <span class="n">codegen</span><span class="p">:</span>  <span class="p">[</span><span class="mf">5.49843425e-10</span> <span class="mf">7.01795140e-10</span> <span class="mf">1.47961976e-09</span> <span class="mf">6.67777003e-02</span>
+ <span class="mf">1.32029716e-01</span> <span class="mf">1.74495485e-01</span> <span class="mf">1.74497468e-01</span> <span class="mf">1.73936079e-01</span>
+ <span class="mf">1.42893790e-01</span> <span class="mf">1.35369758e-01</span><span class="p">]</span>
+<span class="n">Solve</span> <span class="n">Time</span><span class="p">:</span> <span class="mf">16.167</span> <span class="n">ms</span>
+</pre></div>
+</div>
+<p>The portfolio distribution matches with and without using CVXPYgen. By calling the C code, we get a speed-up.</p>
 <div role="list" class="citation-list">
 <div class="citation" id="esfahani2018" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span>Esfahani2018<span class="fn-bracket">]</span></span>

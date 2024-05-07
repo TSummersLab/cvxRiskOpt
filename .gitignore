@@ -7,6 +7,7 @@ dist
 build
 *.csv
 venv
+*.so
 
 examples/esfahani_portfolio
 examples/safaoui_dr_cvar_hs
@@ -20,5 +21,7 @@ examples/simple_mpc_1d
 examples/simple_mpc_2d
 examples/portfolio_opt
 
-examples/*.so
 examples/cvxpygen_mpc.py
+
+prod_opt
+dr_portfolio_opt

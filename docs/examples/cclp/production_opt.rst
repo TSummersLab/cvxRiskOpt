@@ -50,8 +50,13 @@ However, using CVXPY only, we need to reformulate it into the deterministic cons
 
     import cvxpy as cp
     import numpy as np
-    c = 10  # cost
+    import time
+
+    solver = cp.OSQP
+
+    c_val = 10  # cost
     x = cp.Variable(name='x')  # decision variable
+    c = cp.Parameter(name='c')  # create a parameter for the cost
     d_mean = 700  # demain mean
     d_var = 30  # demand variance
     eps = 0.1  # risk bound
@@ -66,22 +71,35 @@ However, using CVXPY only, we need to reformulate it into the deterministic cons
                           gam11=d_var)
     constraints_with_cro = [x >= 0, cc_contr]
     prob_with_cro = cp.Problem(objective, constraints_with_cro)
-    prob_with_cro.solve(solver=cp.CLARABEL)
+    c.value = c_val
+    prob_with_cro.solve(solver=solver)  # cvxpy's first run is usually slower than all other solves. Solve once before timing it
+    t0 = time.time()
+    prob_with_cro.solve(solver=solver)
+    t1 = time.time()
     print("Production amount (CVXPY + cvxRiskOpt): ", x.value)
+    print("Solve Time: %.3f ms" % (1000 * (t1 - t0)))
 
     # cvxpy only
     from scipy.stats import norm
     d_std_div = np.sqrt(d_var)
     constraints = [x >= 0, x >= d_mean + d_std_div * norm.ppf(1-eps)]
     prob = cp.Problem(objective, constraints)
-    prob.solve(solver=cp.CLARABEL)
+    c.value = c_val
+    prob.solve(solver=solver)  # cvxpy's first run is usually slower than all other solves. Solve once before timing it
+    t0 = time.time()
+    prob.solve(solver=solver)
+    t1 = time.time()
     print("Production amount (CVXPY only): ", x.value)
+    print("Solve Time: %.3f ms" % (1000 * (t1 - t0)))
 
 
 .. parsed-literal::
 
-    Production amount (CVXPY + cvxRiskOpt):  707.0193468163586
-    Production amount (CVXPY only):  707.0193468163586
+    Production amount (CVXPY + cvxRiskOpt):  707.0193470105485
+    Solve Time: 0.572 ms
+    Production amount (CVXPY only):  707.0193470105482
+    Solve Time: 0.563 ms
+
 
 Another benefit or using cvxRiskOpt is that if the Guassian assumption about the noise were to change, updating the chance constraint can easily be done by changing the `cclp_gauss` call to call another `cclp_risk_opt` function.
 Below is an example using a DR-VaR risk metric where the probability of meeting the demand must be realized under the work case distribution in a moment-based ambiguity set using the mean and covariance of the uncertainty
@@ -94,9 +112,39 @@ Below is an example using a DR-VaR risk metric where the probability of meeting 
                                     gam11=d_var)
     dr_constraints_with_cro = [x >= 0, dr_cc_contr]
     dr_prob_with_cro = cp.Problem(objective, dr_constraints_with_cro)
-    dr_prob_with_cro.solve(solver=cp.CLARABEL)
+    c.value = c_val
+    dr_prob_with_cro.solve(solver=solver)  # cvxpy's first run is usually slower than all other solves. Solve once before timing it
+    t0 = time.time()
+    dr_prob_with_cro.solve(solver=solver)
+    t1 = time.time()
     print("DR Production amount (CVXPY + cvxRiskOpt): ", x.value)
+    print("Solve Time: %.3f ms" % (1000 * (t1 - t0)))
 
 .. parsed-literal::
 
-    DR Production amount (CVXPY + cvxRiskOpt):  716.4316765283791
+    DR Production amount (CVXPY + cvxRiskOpt):  716.4316767251547
+    Solve Time: 0.603 ms
+
+Generating C code
+-----------------
+We can also generate C code for the CVXPY Problem instance above using CVXPYgen. This can be done as shown below.
+
+.. code-block:: python
+
+    from cvxpygen import cpg
+    cpg.generate_code(prob_with_cro, code_dir='prod_opt', solver=solver)
+    from prod_opt.cpg_solver import cpg_solve
+    prob_with_cro.register_solve('cpg', cpg_solve)
+    c.value = c_val
+    t0 = time.time()
+    prob_with_cro.solve(method='cpg', updated_params=['c'])
+    t1 = time.time()
+    print("DR Production amount (CVXPY + cvxRiskOpt + CVXPgen): ", x.value)
+    print("Solve Time: %.3f ms" % (1000 * (t1 - t0)))
+
+.. parsed-literal::
+
+    DR Production amount (CVXPY + cvxRiskOpt + CVXPgen):  707.0193730343249
+    Solve Time: 0.199 ms
+
+Notice that the result `707.019` matches that from earlier, but the solve time is significantly lower.

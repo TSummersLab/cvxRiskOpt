@@ -41,8 +41,12 @@ The distributionally robust mean-cvar optimization problem, as described in [Esf
 
     import numpy as np
     import cvxpy as cp
+    import time
     from numpy.random import normal as gauss
     from cvxRiskOpt.wass_risk_opt_pb import WassDRExpectation, WassDRCVaR
+
+    solver = cp.CLARABEL
+
 
     def generate_esfahani_portfolio_prob_dataset(num_samples, num_assets, num_simulations):
         # parameters
@@ -61,7 +65,7 @@ The distributionally robust mean-cvar optimization problem, as described in [Esf
         return xi_dataset
 
     eps = 0.01  # Wasserstein radius
-    num_samples = 25
+    num_samples = 100
 
     # problem settings
     num_assets = 10
@@ -95,18 +99,23 @@ The distributionally robust mean-cvar optimization problem, as described in [Esf
                 test_prob.param_dict[par].value = eps
             if 'samples' in par:
                 test_prob.param_dict[par].value = xi
-        test_prob.solve(solver=cp.CLARABEL)
+        test_prob.solve(
+            solver=solver)  # cvxpy's first run is usually slower than all other solves. Solve once before timing it
+        t0 = time.time()
+        test_prob.solve(solver=solver)
+        t1 = time.time()
         test_result = x.value
         x_test.append(test_result)
 
         print("Portfolio distribution: ", x_test)
-
+        print("Solve Time: %.3f ms" % (1000 * (t1 - t0)))
 
 .. parsed-literal::
 
-    Portfolio distribution:  [array([5.30878878e-11, 5.75609346e-11, 4.01569505e-10, 2.26943160e-01,
-           5.28422920e-11, 2.03573625e-01, 2.26943187e-01, 2.26943184e-01,
-           1.15596836e-01, 8.42485446e-09])]
+    Portfolio distribution:  [array([5.49843425e-10, 7.01795140e-10, 1.47961976e-09, 6.67777003e-02,
+       1.32029716e-01, 1.74495485e-01, 1.74497468e-01, 1.73936079e-01,
+       1.42893790e-01, 1.35369758e-01])]
+    Solve Time: 20.528 ms
 
 Note that compared to the code above which uses cvxRiskOpt, the CVXPY-only implementation of the problem, after its manual reformulation, is given by:
 
@@ -153,7 +162,6 @@ Note that compared to the code above which uses cvxRiskOpt, the CVXPY-only imple
     self.constraints = constraints
     self.problem = cp.Problem(self.objective, self.constraints)
 
-
 i.e. instead of the following using cvxRiskOpt:
 
 .. code-block:: python
@@ -170,6 +178,35 @@ i.e. instead of the following using cvxRiskOpt:
     # put together the DR portfolio problem
     test_prob = expect_part + rho * cvar_part + portfolio_constr
 
+Generating C code
+-----------------
+We can also generate C code for the CVXPY Problem instance above using CVXPYgen. This can be done as shown below.
+
+.. code-block:: python
+
+    from cvxpygen import cpg
+    cpg.generate_code(test_prob, code_dir='dr_portfolio_opt', solver=solver)
+    from dr_portfolio_opt.cpg_solver import cpg_solve
+    test_prob.register_solve('cpg', cpg_solve)
+    update_params = []  # get the list of parameters that should be updated
+    for par in test_prob.param_dict.keys():
+        if 'eps' in par or 'samples' in par:
+            update_params.append(par)
+    test_prob.solve(method='cpg', updated_params=update_params)
+    t0 = time.time()
+    test_prob.solve(method='cpg', updated_params=update_params)
+    t1 = time.time()
+    print("Portfolio distribution with codegen: ", x.value)
+    print("Solve Time: %.3f ms" % (1000 * (t1 - t0)))
+
+.. parsed-literal::
+
+    Portfolio distribution with codegen:  [5.49843425e-10 7.01795140e-10 1.47961976e-09 6.67777003e-02
+     1.32029716e-01 1.74495485e-01 1.74497468e-01 1.73936079e-01
+     1.42893790e-01 1.35369758e-01]
+    Solve Time: 16.167 ms
+
+The portfolio distribution matches with and without using CVXPYgen. By calling the C code, we get a speed-up.
 
 .. [Esfahani2018]
     P. Mohajerin Esfahani and D. Kuhn, "Data-driven distributionally robust optimization using the wasserstein metric: Performance guarantees and tractable reformulations," Mathematical Programming, vol. 171, no. 1, pp. 115–166, 2018.

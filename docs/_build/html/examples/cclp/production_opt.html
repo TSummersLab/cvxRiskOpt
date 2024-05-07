@@ -63,8 +63,13 @@ The main difference between using cvxRiskOpt and not doing so is in the inclusio
 <p>However, using CVXPY only, we need to reformulate it into the deterministic constraint as show earlier.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cvxpy</span> <span class="k">as</span> <span class="nn">cp</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="n">c</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># cost</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="n">solver</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">OSQP</span>
+
+<span class="n">c_val</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># cost</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>  <span class="c1"># decision variable</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>  <span class="c1"># create a parameter for the cost</span>
 <span class="n">d_mean</span> <span class="o">=</span> <span class="mi">700</span>  <span class="c1"># demain mean</span>
 <span class="n">d_var</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># demand variance</span>
 <span class="n">eps</span> <span class="o">=</span> <span class="mf">0.1</span>  <span class="c1"># risk bound</span>
@@ -79,20 +84,32 @@ The main difference between using cvxRiskOpt and not doing so is in the inclusio
                       <span class="n">gam11</span><span class="o">=</span><span class="n">d_var</span><span class="p">)</span>
 <span class="n">constraints_with_cro</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">cc_contr</span><span class="p">]</span>
 <span class="n">prob_with_cro</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">constraints_with_cro</span><span class="p">)</span>
-<span class="n">prob_with_cro</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">CLARABEL</span><span class="p">)</span>
+<span class="n">c</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">c_val</span>
+<span class="n">prob_with_cro</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">)</span>  <span class="c1"># cvxpy&#39;s first run is usually slower than all other solves. Solve once before timing it</span>
+<span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">prob_with_cro</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">)</span>
+<span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Production amount (CVXPY + cvxRiskOpt): &quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Solve Time: </span><span class="si">%.3f</span><span class="s2"> ms&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">1000</span> <span class="o">*</span> <span class="p">(</span><span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)))</span>
 
 <span class="c1"># cvxpy only</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span>
 <span class="n">d_std_div</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d_var</span><span class="p">)</span>
 <span class="n">constraints</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">d_mean</span> <span class="o">+</span> <span class="n">d_std_div</span> <span class="o">*</span> <span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">eps</span><span class="p">)]</span>
 <span class="n">prob</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">constraints</span><span class="p">)</span>
-<span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">CLARABEL</span><span class="p">)</span>
+<span class="n">c</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">c_val</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">)</span>  <span class="c1"># cvxpy&#39;s first run is usually slower than all other solves. Solve once before timing it</span>
+<span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">)</span>
+<span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Production amount (CVXPY only): &quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Solve Time: </span><span class="si">%.3f</span><span class="s2"> ms&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">1000</span> <span class="o">*</span> <span class="p">(</span><span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)))</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Production</span> <span class="n">amount</span> <span class="p">(</span><span class="n">CVXPY</span> <span class="o">+</span> <span class="n">cvxRiskOpt</span><span class="p">):</span>  <span class="mf">707.0193468163586</span>
-<span class="n">Production</span> <span class="n">amount</span> <span class="p">(</span><span class="n">CVXPY</span> <span class="n">only</span><span class="p">):</span>  <span class="mf">707.0193468163586</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Production</span> <span class="n">amount</span> <span class="p">(</span><span class="n">CVXPY</span> <span class="o">+</span> <span class="n">cvxRiskOpt</span><span class="p">):</span>  <span class="mf">707.0193470105485</span>
+<span class="n">Solve</span> <span class="n">Time</span><span class="p">:</span> <span class="mf">0.572</span> <span class="n">ms</span>
+<span class="n">Production</span> <span class="n">amount</span> <span class="p">(</span><span class="n">CVXPY</span> <span class="n">only</span><span class="p">):</span>  <span class="mf">707.0193470105482</span>
+<span class="n">Solve</span> <span class="n">Time</span><span class="p">:</span> <span class="mf">0.563</span> <span class="n">ms</span>
 </pre></div>
 </div>
 <p>Another benefit or using cvxRiskOpt is that if the Guassian assumption about the noise were to change, updating the chance constraint can easily be done by changing the <cite>cclp_gauss</cite> call to call another <cite>cclp_risk_opt</cite> function.
@@ -103,13 +120,40 @@ Below is an example using a DR-VaR risk metric where the probability of meeting 
                                 <span class="n">gam11</span><span class="o">=</span><span class="n">d_var</span><span class="p">)</span>
 <span class="n">dr_constraints_with_cro</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">dr_cc_contr</span><span class="p">]</span>
 <span class="n">dr_prob_with_cro</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">dr_constraints_with_cro</span><span class="p">)</span>
-<span class="n">dr_prob_with_cro</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">CLARABEL</span><span class="p">)</span>
+<span class="n">c</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">c_val</span>
+<span class="n">dr_prob_with_cro</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">)</span>  <span class="c1"># cvxpy&#39;s first run is usually slower than all other solves. Solve once before timing it</span>
+<span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">dr_prob_with_cro</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">)</span>
+<span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DR Production amount (CVXPY + cvxRiskOpt): &quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Solve Time: </span><span class="si">%.3f</span><span class="s2"> ms&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">1000</span> <span class="o">*</span> <span class="p">(</span><span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)))</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DR</span> <span class="n">Production</span> <span class="n">amount</span> <span class="p">(</span><span class="n">CVXPY</span> <span class="o">+</span> <span class="n">cvxRiskOpt</span><span class="p">):</span>  <span class="mf">716.4316765283791</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DR</span> <span class="n">Production</span> <span class="n">amount</span> <span class="p">(</span><span class="n">CVXPY</span> <span class="o">+</span> <span class="n">cvxRiskOpt</span><span class="p">):</span>  <span class="mf">716.4316767251547</span>
+<span class="n">Solve</span> <span class="n">Time</span><span class="p">:</span> <span class="mf">0.603</span> <span class="n">ms</span>
 </pre></div>
 </div>
+</section>
+<section id="generating-c-code">
+<h2>Generating C code<a class="headerlink" href="#generating-c-code" title="Link to this heading">¶</a></h2>
+<p>We can also generate C code for the CVXPY Problem instance above using CVXPYgen. This can be done as shown below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cvxpygen</span> <span class="kn">import</span> <span class="n">cpg</span>
+<span class="n">cpg</span><span class="o">.</span><span class="n">generate_code</span><span class="p">(</span><span class="n">prob_with_cro</span><span class="p">,</span> <span class="n">code_dir</span><span class="o">=</span><span class="s1">&#39;prod_opt&#39;</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">prod_opt.cpg_solver</span> <span class="kn">import</span> <span class="n">cpg_solve</span>
+<span class="n">prob_with_cro</span><span class="o">.</span><span class="n">register_solve</span><span class="p">(</span><span class="s1">&#39;cpg&#39;</span><span class="p">,</span> <span class="n">cpg_solve</span><span class="p">)</span>
+<span class="n">c</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">c_val</span>
+<span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">prob_with_cro</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;cpg&#39;</span><span class="p">,</span> <span class="n">updated_params</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">])</span>
+<span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DR Production amount (CVXPY + cvxRiskOpt + CVXPgen): &quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Solve Time: </span><span class="si">%.3f</span><span class="s2"> ms&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">1000</span> <span class="o">*</span> <span class="p">(</span><span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)))</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DR</span> <span class="n">Production</span> <span class="n">amount</span> <span class="p">(</span><span class="n">CVXPY</span> <span class="o">+</span> <span class="n">cvxRiskOpt</span> <span class="o">+</span> <span class="n">CVXPgen</span><span class="p">):</span>  <span class="mf">707.0193730343249</span>
+<span class="n">Solve</span> <span class="n">Time</span><span class="p">:</span> <span class="mf">0.199</span> <span class="n">ms</span>
+</pre></div>
+</div>
+<p>Notice that the result <cite>707.019</cite> matches that from earlier, but the solve time is significantly lower.</p>
 </section>
 </section>
 
