@@ -7,12 +7,6 @@ import numpy as np
 
 def paper_mhe(horizon, sim_steps, constraint_type, keep_init_run, solver):
     seed = int(np.random.rand() * 1000000)
-    # t_test = simple_1d_mhe(horizon, sim_steps, constraint_type,
-    #                        plot_res=False, use_cpg=False, gen_cpg=False,
-    #                        keep_init_run=keep_init_run, solver=solver)
-    # t_test_codegen = simple_1d_mhe(horizon, sim_steps, constraint_type,
-    #                                plot_res=False, use_cpg=True, gen_cpg=True,
-    #                                keep_init_run=keep_init_run, solver=solver)
     t_test = double_integ_mhe(dt=1, horizon=horizon, sim_steps=sim_steps,
                               constraint_type=constraint_type, plot_res=False,
                               use_cpg=False, gen_cpg=False,

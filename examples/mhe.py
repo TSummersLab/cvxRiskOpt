@@ -269,7 +269,6 @@ def double_integ_mhe(dt=1.0, horizon=10, sim_steps=200, constraint_type=None, pl
             for t_tmp in range(t - N_mhe + 1, t + 1):
                 x_est_hist[:, t_tmp] = x_mhe.value[:, t_tmp_mhe]
                 t_tmp_mhe += 1
-            # x_est_hist[t - N_mhe + 1:t + 1] = x_mhe.value[1:]
 
         # # # KF gain:
         P_pred = P + w_var
@@ -284,11 +283,13 @@ def double_integ_mhe(dt=1.0, horizon=10, sim_steps=200, constraint_type=None, pl
         axs[0].plot(range(sim_steps), y_meas_hist, color='tab:red', alpha=0.5, linestyle='--')
         axs[0].plot(range(sim_steps), x_est_hist[0, :], color='tab:green')
         axs[0].plot(range(sim_steps), x_kf_est_hist[0, :], color='tab:blue')
+        axs[0].set_title("Position")
         axs[0].legend(["true", "meas", "est", "KF"])
 
         axs[1].plot(range(sim_steps), x_true_hist[1, :], color='k')
         axs[1].plot(range(sim_steps), x_est_hist[1, :], color='tab:green')
         axs[1].plot(range(sim_steps), x_kf_est_hist[1, :], color='tab:blue')
+        axs[1].set_title("Velocity")
         axs[1].legend(["true", "est", "KF"])
         plt.show()
 
@@ -311,6 +312,16 @@ def double_integ_mhe(dt=1.0, horizon=10, sim_steps=200, constraint_type=None, pl
 if __name__ == "__main__":
     # TODO: Clarabel output using compiled code is wrong
     solver = cp.OSQP
+    constr = "None"  # "None", "gauss", "moment"
+    double_integ_mhe(dt=1, horizon=10, sim_steps=200, constraint_type=constr, plot_res=True,
+                     use_cpg=False, gen_cpg=False,
+                     keep_init_run=False, solver=solver, seed=2)
+
+    double_integ_mhe(dt=1, horizon=10, sim_steps=200, constraint_type=constr, plot_res=True,
+                     use_cpg=True, gen_cpg=True,
+                     keep_init_run=False, solver=solver, seed=2)
+
+    # 1D MHE
     # t_hist = simple_1d_mhe(horizon=10, sim_steps=200, constraint_type="gauss", plot_res=True,
     #                        use_cpg=False, gen_cpg=False,
     #                        keep_init_run=False, solver=solver, seed=2)
@@ -322,7 +333,3 @@ if __name__ == "__main__":
     # print(np.mean(t_hist) * 1000, "ms")
     # print(t_hist_gen)
     # print(np.mean(t_hist_gen) * 1000, "ms")
-
-    double_integ_mhe(dt=1, horizon=10, sim_steps=200, constraint_type="moment", plot_res=True,
-                     use_cpg=False, gen_cpg=False,
-                     keep_init_run=False, solver=solver, seed=2)

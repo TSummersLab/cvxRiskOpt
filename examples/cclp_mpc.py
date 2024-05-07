@@ -118,6 +118,7 @@ def simple_1d_mpc(use_cpg=False, gen_cpg=False, with_cclp=False, plot_res=False,
     u_hist = np.array(u_hist)
     if plot_res:
         fig, ax = plt.subplots(2)
+        fig.suptitle("1D MPC State and Control")
         ax[0].plot(range(len(x_hist)), x_hist)
         ax[0].plot(range(len(x_hist)), [0] * len(x_hist), 'k')
         ax[0].set(ylabel='x')
@@ -202,9 +203,14 @@ def simple_2d_mpc(use_cpg=False, gen_cpg=False, plot_res=False, keep_init_run=Fa
     for t in range(steps):
         x0.value = current_state
         if use_cpg:
-            ts = time.time()
-            prob.solve(method='cpg', updated_params=['x0'], verbose=False)
-            te = time.time()
+            if solver in [cp.ECOS, cp.OSQP]:
+                ts = time.time()
+                prob.solve(method='cpg', updated_params=['x0'])
+                te = time.time()
+            else:
+                ts = time.time()
+                prob.solve(method='cpg', updated_params=['x0'], verbose=False)
+                te = time.time()
         else:
             ts = time.time()
             prob.solve(solver)
@@ -226,8 +232,10 @@ def simple_2d_mpc(use_cpg=False, gen_cpg=False, plot_res=False, keep_init_run=Fa
     if plot_res:
         plt.plot(x_hist[:, 0], x_hist[:, 1])
         plt.scatter(0, 0)
+        plt.title("2D MPC State")
         plt.show()
         fig, axs = plt.subplots(2)
+        fig.suptitle("2D MPC Controls")
         axs[0].plot(range(steps), u_hist[:, 0])
         axs[1].plot(range(steps), u_hist[:, 1])
         plt.show()
@@ -392,9 +400,11 @@ def hvac_mpc_time_varying_constraints(plot_res=False):  # (use_cpg=False, gen_cp
         plt.plot(np.linspace(0, (total_inputs - horizon - 1) / inputs_per_hr, total_inputs - horizon - 1), w_hist,
                  'tab:purple')
         plt.legend(['max', 'min', 'ref', 'outdoor', 'actual indoor', 'actual outdoor'])
+        plt.title("HVAC Tracking Temps")
         plt.show()
         plt.plot(np.linspace(0, (total_inputs - horizon - 1) / inputs_per_hr, total_inputs - horizon - 1), u_hist,
                  'tab:orange')
+        plt.title("HVAC Tracking Control")
         plt.show()
 
 
@@ -558,9 +568,11 @@ def temp_mpc_regulator_time_varying_constraints(horizon=10, inputs_per_hr=4, tot
         plt.plot(np.linspace(0, (total_inputs - horizon - 1) / inputs_per_hr, total_inputs - horizon - 1), w_hist,
                  'tab:purple')
         plt.legend(['max', 'min', 'ref', 'outdoor', 'actual indoor', 'actual outdoor'])
+        plt.title("Temp Regulator Temps")
         plt.show()
         plt.plot(np.linspace(0, (total_inputs - horizon - 1) / inputs_per_hr, total_inputs - horizon - 1), u_hist,
                  'tab:orange')
+        plt.title("Temp Regulator Control")
         plt.show()
     return t_hist
 
@@ -568,5 +580,6 @@ def temp_mpc_regulator_time_varying_constraints(horizon=10, inputs_per_hr=4, tot
 if __name__ == "__main__":
     simple_1d_mpc(use_cpg=False, gen_cpg=False, with_cclp=True, plot_res=True)
     simple_2d_mpc(use_cpg=False, gen_cpg=False, plot_res=True)
+    simple_2d_mpc(use_cpg=True, gen_cpg=True, plot_res=True, solver=cp.OSQP)
     hvac_mpc_time_varying_constraints(plot_res=True)
     temp_mpc_regulator_time_varying_constraints(plot_res=True, use_cpg=False, gen_cpg=False)
