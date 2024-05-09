@@ -139,12 +139,12 @@ We can also generate C code for the CVXPY Problem instance above using CVXPYgen.
     t0 = time.time()
     prob_with_cro.solve(method='cpg', updated_params=['c'])
     t1 = time.time()
-    print("DR Production amount (CVXPY + cvxRiskOpt + CVXPgen): ", x.value)
+    print("DR Production amount (CVXPY + cvxRiskOpt + CVXPYgen): ", x.value)
     print("Solve Time: %.3f ms" % (1000 * (t1 - t0)))
 
 .. parsed-literal::
 
-    DR Production amount (CVXPY + cvxRiskOpt + CVXPgen):  707.0193730343249
+    DR Production amount (CVXPY + cvxRiskOpt + CVXPYgen):  707.0193730343249
     Solve Time: 0.199 ms
 
 Notice that the result `707.019` matches that from earlier, but the solve time is significantly lower.

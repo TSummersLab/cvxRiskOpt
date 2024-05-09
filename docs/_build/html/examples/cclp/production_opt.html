@@ -145,11 +145,11 @@ Below is an example using a DR-VaR risk metric where the probability of meeting 
 <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 <span class="n">prob_with_cro</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;cpg&#39;</span><span class="p">,</span> <span class="n">updated_params</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">])</span>
 <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DR Production amount (CVXPY + cvxRiskOpt + CVXPgen): &quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DR Production amount (CVXPY + cvxRiskOpt + CVXPYgen): &quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Solve Time: </span><span class="si">%.3f</span><span class="s2"> ms&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">1000</span> <span class="o">*</span> <span class="p">(</span><span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)))</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DR</span> <span class="n">Production</span> <span class="n">amount</span> <span class="p">(</span><span class="n">CVXPY</span> <span class="o">+</span> <span class="n">cvxRiskOpt</span> <span class="o">+</span> <span class="n">CVXPgen</span><span class="p">):</span>  <span class="mf">707.0193730343249</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DR</span> <span class="n">Production</span> <span class="n">amount</span> <span class="p">(</span><span class="n">CVXPY</span> <span class="o">+</span> <span class="n">cvxRiskOpt</span> <span class="o">+</span> <span class="n">CVXPYgen</span><span class="p">):</span>  <span class="mf">707.0193730343249</span>
 <span class="n">Solve</span> <span class="n">Time</span><span class="p">:</span> <span class="mf">0.199</span> <span class="n">ms</span>
 </pre></div>
 </div>

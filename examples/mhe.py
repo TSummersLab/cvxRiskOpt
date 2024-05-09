@@ -310,16 +310,15 @@ def double_integ_mhe(dt=1.0, horizon=10, sim_steps=200, constraint_type=None, pl
 
 
 if __name__ == "__main__":
-    # TODO: Clarabel output using compiled code is wrong
-    solver = cp.OSQP
-    constr = "None"  # "None", "gauss", "moment"
+    solver = cp.CLARABEL
+    constr = "moment"  # "None", "gauss", "moment"
     double_integ_mhe(dt=1, horizon=10, sim_steps=200, constraint_type=constr, plot_res=True,
                      use_cpg=False, gen_cpg=False,
-                     keep_init_run=False, solver=solver, seed=2)
+                     keep_init_run=False, solver=solver,)
 
     double_integ_mhe(dt=1, horizon=10, sim_steps=200, constraint_type=constr, plot_res=True,
                      use_cpg=True, gen_cpg=True,
-                     keep_init_run=False, solver=solver, seed=2)
+                     keep_init_run=False, solver=solver)
 
     # 1D MHE
     # t_hist = simple_1d_mhe(horizon=10, sim_steps=200, constraint_type="gauss", plot_res=True,
