@@ -1,4 +1,3 @@
-
 from setuptools import setup
 
 setup(
@@ -20,14 +19,9 @@ setup(
         "numpy>=1.26.2",
         "matplotlib>=3.8.0",
         "cvxpygen>=0.3.5",
-        "cvxpy>=1.4.3"
+        "cvxpy>=1.4.3",
     ],
     extras_require={
         "dev": ["pytest==7.4.0", "polytope==0.2.5", "Sphinx==7.2.6"],
     },
-    # classifiers=[
-    #     # Add your classifiers here if any
-    # ],
-    # Add your scripts here if any
-    # scripts=[],
 )
