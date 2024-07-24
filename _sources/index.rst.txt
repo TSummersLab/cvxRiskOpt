@@ -13,6 +13,15 @@ To encourage risk-based optimization problems and help speed up the development 
 cvxRiskOpt provides users with tools to automatically generate risk-based optimization problems and risk-based constraints. cvxRiskOpt integrates with CVXPY directly resulting in CVXPY Problems and constraints. These also enables using CVXPYgen directly allowing users to automatically generate C-code which can be used on embedded systems or utilized with the python-wrapper to speed up solving the optimization problems.
 
 
+
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Contents:
+
+   github
+
 .. toctree::
    :hidden:
 
@@ -37,3 +46,17 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+
+GitHub Repository
+=================
+
+You can find the source code for this project on GitHub:
+
+.. raw:: html
+
+   <div style="margin-bottom: 20px;">
+     <a href="https://github.com/TSummersLab/cvxRiskOpt" target="_blank">
+       <img alt="GitHub" src="https://img.shields.io/badge/GitHub-source code-blue">
+     </a>
+   </div>
