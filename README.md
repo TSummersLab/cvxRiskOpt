@@ -17,6 +17,8 @@ Notes:
 - The installation will also include cvxpy and cvxpygen.
 - Please refer to cvxpy's documentation for [installing additional solvers](https://www.cvxpy.org/install/).
 - Compiling code with Clarabel requires `Rust`, `Eigen`, and `cbindgen`. (e.g. These can be installed with `homebrew` on MacOS)
+- Compiled code using the ECOS solver is licensed under the GNU General Public License v3.0.
+- Please refer to the [cvxpygen](https://github.com/cvxgrp/cvxpygen) documentation for more details about compiled code.
 
 ### Installing from source
 
