@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="cvxRiskOpt",
-    version="0.1.4",
+    version="0.2.0",
     description="Risk-Based Optimization tool using CVXPY and CVXPYgen",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
@@ -11,7 +11,7 @@ setup(
     maintainer="Sleiman Safaoui",
     maintainer_email="snsafaoui@gmail.com",
     url="https://github.com/TSummersLab/cvxRiskOpt",
-    license="GPL-3.0",
+    license="Apache-2.0",
     keywords=["dro", "risk", "optimization", "robust", "code generation", "mpc"],
     python_requires=">=3.10",
     install_requires=[
